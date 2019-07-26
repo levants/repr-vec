@@ -1,0 +1,13 @@
+.idea/
+.vscode/
+venv/
+data
+data.zip
+videos
+.ipynb_checkpoints/
+**.pyc
+*.local.ipynb
+
+.DS_Store
+
+**.onnx
