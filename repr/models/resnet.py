@@ -14,7 +14,7 @@ from fastai.vision import *
 from torch.utils import model_zoo
 from torchvision.models.resnet import (ResNet, Bottleneck, BasicBlock, model_urls)
 
-__all__ = ['Flatten', 'ResNetModule', 'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'init_model']
+__all__ = ['Flatten', 'ResNetCore', 'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'init_model']
 
 
 class Flatten(nn.Module):
@@ -27,11 +27,11 @@ class Flatten(nn.Module):
         return x.view(x.size(0), -1)
 
 
-class ResNetModule(ResNet):
+class ResNetCore(ResNet):
     """ResNet extension model"""
 
     def __init__(self, block, layers, channels=3, num_classes=1000):
-        super(ResNetModule, self).__init__(block, layers, num_classes=num_classes)
+        super(ResNetCore, self).__init__(block, layers, num_classes=num_classes)
         self.avgpool = nn.AdaptiveAvgPool2d(1)
         self.conv1 = nn.Conv2d(channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
         self.flatten = Flatten()
@@ -104,7 +104,7 @@ def _init_layers(layers):
     return [2, 2, 2, 2] if layers is None else layers
 
 
-def _init_model(core_type=ResNetModule, block=BasicBlock, layers=None,
+def _init_model(core_type=ResNetCore, block=BasicBlock, layers=None,
                 model_key='resnet18', pretrained=False, **kwargs):
     """
     Initializes appropriated model
@@ -140,7 +140,7 @@ def _init_module(block=BasicBlock, layers=None, model_key='resnet18',
     Returns:
         network model with pre-trained weights
     """
-    return _init_model(core_type=ResNetModule, block=block, layers=layers,
+    return _init_model(core_type=ResNetCore, block=block, layers=layers,
                        model_key=model_key, pretrained=pretrained, **kwargs)
 
 

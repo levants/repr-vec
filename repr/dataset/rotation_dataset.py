@@ -174,7 +174,7 @@ def label_and_folder(src_root: Path, dst_root: Path, h: int = 224, w: int = 224,
 
 def init_databunch(dst_root: Path, train: PathOrStr = 'train', valid: PathOrStr = 'valid', valid_pct=None,
                    seed: int = None, size: int = None, classes: Collection = None, bs: int = 64, val_bs: int = None,
-                   ds_tfms: Optional[TfmList] = None, **kwargs: Any) -> ImageDataBunch:
+                   ds_tfms: Optional[TfmList] = None, num_workers=None, **kwargs: Any) -> ImageDataBunch:
     """
     Initializes image data bunch
     Args:
@@ -188,13 +188,15 @@ def init_databunch(dst_root: Path, train: PathOrStr = 'train', valid: PathOrStr 
         bs: batch size
         val_bs: validation batch size
         ds_tfms: data transformation
+        num_workers: number of worker threads
         **kwargs: additional arguments
 
     Returns:
         initialized image data bunch
     """
     return ImageDataBunch.from_folder(dst_root, train=train, valid=valid, valid_pct=valid_pct, seed=seed,
-                                      classes=classes, bs=bs, val_bs=val_bs, size=size, ds_tfms=ds_tfms, **kwargs)
+                                      classes=classes, bs=bs, val_bs=val_bs, size=size, ds_tfms=ds_tfms,
+                                      num_workers=num_workers, **kwargs)
 
 
 def rotation_databunch(src_root: Path, dst_root: Path, h: int = 224, w: int = 224, size: int = None,
