@@ -20,7 +20,7 @@ _IMG_EXTS = set(_IMG_EXTS_1 + [ext.upper() for ext in _IMG_EXTS_1])
 _CLASSES = [0, 90, 180, 270]
 
 
-def init_transforms(size):
+def init_transforms(size: int = None):
     """
     Initializes additional transforms
     Args:
@@ -29,11 +29,14 @@ def init_transforms(size):
     Returns:
         additional transformations
     """
-    return rand_resize_crop(size) + [rand_crop(p=1.), crop_pad(), brightness(change=(0.1, 0.9), p=1.0),
-                                     contrast(scale=(0.5, 2.), p=1.), jitter(magnitude=-0.2, p=1.),
-                                     symmetric_warp(magnitude=(-0.2, 0.2), p=1.),
-                                     zoom(scale=1.78, p=1.), cutout(n_holes=(1, 4), length=(10, 160), p=1.),
-                                     squish(scale=(0.68, 1.38))]
+    xtr_trsf_tail = [rand_crop(p=1.), crop_pad(), brightness(change=(0.1, 0.9), p=1.0),
+                     contrast(scale=(0.5, 2.), p=1.), jitter(magnitude=-0.2, p=1.),
+                     symmetric_warp(magnitude=(-0.2, 0.2), p=1.),
+                     zoom(scale=1.78, p=1.), cutout(n_holes=(1, 4), length=(10, 160), p=1.),
+                     squish(scale=(0.68, 1.38))]
+    xtr_trsf = rand_resize_crop(size) + xtr_trsf_tail if size and size > 0 else xtr_trsf_tail
+
+    return xtr_trsf
 
 
 def make_dirs(dst_dir: Path) -> dict:

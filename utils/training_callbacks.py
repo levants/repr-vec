@@ -29,8 +29,6 @@ class CSVLoggeerLine(callbacks.CSVLogger):
         if self.flush_epoch:
             self.file.flush()
 
-        return True
-
 
 def init_callbacs(monitor: str = 'accuracy', pref: str = None, append: bool = False, flush_epoch: bool = True):
     """
