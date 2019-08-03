@@ -94,7 +94,7 @@ def _read_resize(p: str, h: int, w: int, interpolation: int) -> np.ndarray:
 def generate_classes(src_dir: Path, dst_dir: Path, h: int = 224, w: int = 224, tr_mx: dict = None,
                      interpolation: int = cv2.INTER_LINEAR):
     """
-    Generate rotation dataset
+    Generate rotation data-set for classification
     Args:
         src_dir: source directory
         dst_dir: destination directory

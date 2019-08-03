@@ -28,7 +28,7 @@ class Flatten(nn.Module):
 
 
 class ResNetCore(ResNet):
-    """ResNet extension model"""
+    """ResNet extension core model"""
 
     def __init__(self, block, layers, channels=3, num_classes=1000):
         super(ResNetCore, self).__init__(block, layers, num_classes=num_classes)
@@ -148,7 +148,7 @@ def resnet18(pretrained=False, **kwargs):
     """
     Constructs a ResNet-18 model.
     Args:
-        pretrained: If True, returns a model pre-trained on ImageNet data
+        pretrained: if True, returns a model pre-trained on ImageNet data
         **kwargs: additional named arguments
 
     Returns:
@@ -162,7 +162,7 @@ def resnet34(pretrained=False, **kwargs):
     """
     Constructs a ResNet-34 model.
     Args:
-        pretrained: If True, returns a model pre-trained on ImageNet data
+        pretrained: if True, returns a model pre-trained on ImageNet data
         **kwargs: additional named arguments
 
     Returns:
