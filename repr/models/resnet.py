@@ -23,7 +23,7 @@ class Flatten(nn.Module):
     def __init__(self):
         super(Flatten, self).__init__()
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return x.view(x.size(0), -1)
 
 
@@ -36,7 +36,7 @@ class ResNetCore(ResNet):
         self.conv1 = nn.Conv2d(channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
         self.flatten = Flatten()
 
-    def features(self, input_tensor):
+    def features(self, input_tensor: torch.Tensor) -> torch.Tensor:
         """
         Extracts features from input tensor
         Args:
@@ -57,7 +57,7 @@ class ResNetCore(ResNet):
 
         return features_tensor
 
-    def glob_pool(self, input_tensor):
+    def glob_pool(self, input_tensor: torch.Tensor) -> torch.Tensor:
         """
         Extracts features from average pooling layer of input tensor
         Args:
@@ -71,7 +71,7 @@ class ResNetCore(ResNet):
 
         return features_tensor
 
-    def vect(self, input_tensor):
+    def vect(self, input_tensor: torch.Tensor) -> torch.Tensor:
         """
         Extracts features from average pooling layer of input tensor
         Args:
@@ -85,14 +85,14 @@ class ResNetCore(ResNet):
 
         return features_tensor
 
-    def forward(self, input_tensor):
+    def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
         x = self.vect(input_tensor)
         output_tensor = self.fc(x)
 
         return output_tensor
 
 
-def _init_layers(layers):
+def _init_layers(layers: list) -> list:
     """
     Sets default values to layers
     Args:
@@ -104,7 +104,8 @@ def _init_layers(layers):
     return [2, 2, 2, 2] if layers is None else layers
 
 
-def _init_model(core_type=ResNetCore, block=BasicBlock, layers=None, model_key='resnet18', pretrained=False, **kwargs):
+def _init_model(core_type: nn.Module = ResNetCore, block: nn.Module = BasicBlock, layers: list = None,
+                model_key: str = 'resnet18', pretrained: bool = False, **kwargs) -> nn.Module:
     """
     Initializes appropriated model
     Args:
@@ -125,7 +126,8 @@ def _init_model(core_type=ResNetCore, block=BasicBlock, layers=None, model_key='
     return model
 
 
-def _init_module(block=BasicBlock, layers=None, model_key='resnet18', pretrained=False, **kwargs):
+def _init_module(block: nn.Module = BasicBlock, layers: list = None, model_key: str = 'resnet18',
+                 pretrained: bool = False, **kwargs) -> nn.Module:
     """
     Initializes appropriated model
     Args:
@@ -142,7 +144,7 @@ def _init_module(block=BasicBlock, layers=None, model_key='resnet18', pretrained
                        **kwargs)
 
 
-def resnet18(pretrained=False, **kwargs):
+def resnet18(pretrained: bool = False, **kwargs) -> nn.Module:
     """
     Constructs a ResNet-18 model.
     Args:
@@ -156,7 +158,7 @@ def resnet18(pretrained=False, **kwargs):
                         **kwargs)
 
 
-def resnet34(pretrained=False, **kwargs):
+def resnet34(pretrained: bool = False, **kwargs) -> nn.Module:
     """
     Constructs a ResNet-34 model.
     Args:
@@ -170,7 +172,7 @@ def resnet34(pretrained=False, **kwargs):
                         **kwargs)
 
 
-def resnet50(pretrained=False, **kwargs):
+def resnet50(pretrained: bool = False, **kwargs) -> nn.Module:
     """
     Constructs a ResNet-50 model.
     Args:
@@ -184,7 +186,7 @@ def resnet50(pretrained=False, **kwargs):
                         **kwargs)
 
 
-def resnet101(pretrained=False, **kwargs):
+def resnet101(pretrained: bool = False, **kwargs) -> nn.Module:
     """
     Constructs a ResNet-101 model.
     Args:
@@ -198,7 +200,7 @@ def resnet101(pretrained=False, **kwargs):
                         **kwargs)
 
 
-def resnet152(pretrained=False, **kwargs):
+def resnet152(pretrained: bool = False, **kwargs) -> nn.Module:
     """
     Constructs a ResNet-152 model.
     Args:
@@ -237,7 +239,7 @@ def _name_2_func(arch_name: str) -> callable:
     return arch_func
 
 
-def init_model(arch, pretrained=False, head: nn.Sequential = None, **kwargs):
+def init_model(arch: str, pretrained: bool = False, head: nn.Sequential = None, **kwargs) -> nn.Module:
     """
     Initializes ResNet model
     Args:
