@@ -43,7 +43,7 @@ class ResNetCore(ResNet):
             input_tensor: input image tensor
 
         Returns:
-            features_tensor: features tensor
+            repr_vec: features tensor
         """
         x = self.conv1(input_tensor)
         x = self.bn1(x)
@@ -53,9 +53,9 @@ class ResNetCore(ResNet):
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
-        features_tensor = self.layer4(x)
+        repr_vec = self.layer4(x)
 
-        return features_tensor
+        return repr_vec
 
     def glob_pool(self, input_tensor: torch.Tensor) -> torch.Tensor:
         """
@@ -64,12 +64,12 @@ class ResNetCore(ResNet):
             input_tensor: input image tensor
 
         Returns:
-            features_tensor: features tensor
+            repr_vec: features tensor
         """
         x = self.features(input_tensor)
-        features_tensor = self.avgpool(x)
+        repr_vec = self.avgpool(x)
 
-        return features_tensor
+        return repr_vec
 
     def vect(self, input_tensor: torch.Tensor) -> torch.Tensor:
         """
@@ -78,18 +78,18 @@ class ResNetCore(ResNet):
             input_tensor: input image tensor
 
         Returns:
-            features_tensor: features tensor
+            repr_vec: features tensor
         """
         x = self.glob_pool(input_tensor)
-        features_tensor = self.flatten(x)
+        repr_vec = self.flatten(x)
 
-        return features_tensor
+        return repr_vec
 
     def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
         x = self.vect(input_tensor)
-        output_tensor = self.fc(x)
+        logits = self.fc(x)
 
-        return output_tensor
+        return logits
 
 
 def _init_layers(layers: list) -> list:

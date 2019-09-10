@@ -97,6 +97,18 @@ def _read_resize(p: str, h: int, w: int, interpolation: int) -> np.ndarray:
     return img
 
 
+def _valid_image(img):
+    """
+    Validates image
+    Args:
+        img: image to validate
+
+    Returns:
+        image validation results
+    """
+    return img is not None and img.suffix in _IMG_EXTS
+
+
 def generate_classes(src_dir: Path, dst_dir: Path, h: int = 224, w: int = 224, tr_mx: dict = None,
                      interpolation: int = cv2.INTER_LINEAR):
     """
@@ -108,17 +120,18 @@ def generate_classes(src_dir: Path, dst_dir: Path, h: int = 224, w: int = 224, t
         w: width of image
         tr_mx: rotation matrices
         interpolation: interpolation for resize
-
     """
     dest_dirs = make_dirs(dst_dir)
-    img_dict = {str(p.name): _read_resize(p, h, w, interpolation) for p in src_dir.iterdir() if p is not None and \
-                p.suffix in _IMG_EXTS}
+    img_dict = {str(p.name): _read_resize(p, h, w, interpolation) for p in src_dir.iterdir() if _valid_image(p)}
     ms = _init_rotation_matrix(h=h, w=w, tr_mx=tr_mx)
     for k, v in img_dict.items():
         for d, m in ms.items():
-            mod = v if d == '0' else cv2.warpAffine(v, m, (h, w))
-            dst = dest_dirs[d]
-            cv2.imwrite(str(dst / k), mod)
+            try:
+                mod = v if d == '0' else cv2.warpAffine(v, m, (h, w))
+                dst = dest_dirs[d]
+                cv2.imwrite(str(dst / k), mod)
+            except Exception as ex:
+                print(f'Error on rotating image {k} ', ex)
 
 
 def _add_tests(src_root: Path, dst_root: Path, src_dirs: list, dst_dirs: list, tst_dir: str = None):
