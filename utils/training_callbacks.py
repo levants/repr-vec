@@ -56,7 +56,6 @@ def adam_16f(learn: Learner):
     Adding epsilon to Adam optimizer for mixed-precision training
     Args:
         learn: training wrapper
-
     """
     adam_w16 = partial(torch.optim.Adam, betas=(0.9, 0.99), eps=1e-4)
     learn.opt_func = adam_w16

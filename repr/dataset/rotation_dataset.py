@@ -89,7 +89,7 @@ def _read_resize(p: str, h: int, w: int, interpolation: int) -> np.ndarray:
         img: resized image
     """
     orig_img = cv2.imread(str(p), cv2.IMREAD_ANYCOLOR)
-    if orig_img is None:
+    if orig_img is None or len(orig_img.shape) < 2 or orig_img.shape[0] < 10 or orig_img.shape[1] < 10:
         img = None
     else:
         img = cv2.resize(orig_img, (w, h), interpolation=interpolation)
