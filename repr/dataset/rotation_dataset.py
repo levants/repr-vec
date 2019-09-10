@@ -31,7 +31,7 @@ def init_transforms(size: int = None):
     """
     xtr_trsf_tail = [rand_crop(p=1.), crop_pad(), brightness(change=(0.1, 0.9), p=1.0),
                      contrast(scale=(0.5, 2.), p=1.), jitter(magnitude=-0.2, p=1.),
-                     symmetric_warp(magnitude=(-0.2, 0.2), p=1.),
+                     symmetric_warp(magnitude=(-0.2, 0.2), p=1.), rotate(degrees=(-15, 15), p=1.0),
                      zoom(scale=1.78, p=1.), cutout(n_holes=(1, 4), length=(10, 160), p=1.),
                      squish(scale=(0.68, 1.38))]
     xtr_trsf = rand_resize_crop(size) + xtr_trsf_tail if size and size > 0 else xtr_trsf_tail
@@ -86,9 +86,15 @@ def _read_resize(p: str, h: int, w: int, interpolation: int) -> np.ndarray:
         interpolation: interpolation for resize
 
     Returns:
-        resized image
+        img: resized image
     """
-    return cv2.resize(cv2.imread(str(p), cv2.IMREAD_ANYCOLOR), (w, h), interpolation=interpolation)
+    orig_img = cv2.imread(str(p), cv2.IMREAD_ANYCOLOR)
+    if orig_img.shape is None:
+        img = None
+    else:
+        img = cv2.resize(orig_img, (w, h), interpolation=interpolation)
+
+    return img
 
 
 def generate_classes(src_dir: Path, dst_dir: Path, h: int = 224, w: int = 224, tr_mx: dict = None,
@@ -105,7 +111,8 @@ def generate_classes(src_dir: Path, dst_dir: Path, h: int = 224, w: int = 224, t
 
     """
     dest_dirs = make_dirs(dst_dir)
-    img_dict = {str(p.name): _read_resize(p, h, w, interpolation) for p in src_dir.iterdir() if p.suffix in _IMG_EXTS}
+    img_dict = {str(p.name): _read_resize(p, h, w, interpolation) for p in src_dir.iterdir() if p is not None and \
+                p.suffix in _IMG_EXTS}
     ms = _init_rotation_matrix(h=h, w=w, tr_mx=tr_mx)
     for k, v in img_dict.items():
         for d, m in ms.items():
@@ -156,7 +163,7 @@ def generate_data(src_root: Path, dst_root: Path, h: int = 224, w: int = 224, tr
 
 
 def label_and_folder(src_root: Path, dst_root: Path, h: int = 224, w: int = 224, train: PathOrStr = 'train',
-                     valid: PathOrStr = 'valid', valid_pct=None):
+                     valid: PathOrStr = 'valid', valid_pct: float = None):
     """
     Label and put data in folders
     Args:

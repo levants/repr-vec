@@ -104,8 +104,7 @@ def _init_layers(layers):
     return [2, 2, 2, 2] if layers is None else layers
 
 
-def _init_model(core_type=ResNetCore, block=BasicBlock, layers=None,
-                model_key='resnet18', pretrained=False, **kwargs):
+def _init_model(core_type=ResNetCore, block=BasicBlock, layers=None, model_key='resnet18', pretrained=False, **kwargs):
     """
     Initializes appropriated model
     Args:
@@ -126,8 +125,7 @@ def _init_model(core_type=ResNetCore, block=BasicBlock, layers=None,
     return model
 
 
-def _init_module(block=BasicBlock, layers=None, model_key='resnet18',
-                 pretrained=False, **kwargs):
+def _init_module(block=BasicBlock, layers=None, model_key='resnet18', pretrained=False, **kwargs):
     """
     Initializes appropriated model
     Args:
@@ -140,8 +138,8 @@ def _init_module(block=BasicBlock, layers=None, model_key='resnet18',
     Returns:
         network model with pre-trained weights
     """
-    return _init_model(core_type=ResNetCore, block=block, layers=layers,
-                       model_key=model_key, pretrained=pretrained, **kwargs)
+    return _init_model(core_type=ResNetCore, block=block, layers=layers, model_key=model_key, pretrained=pretrained,
+                       **kwargs)
 
 
 def resnet18(pretrained=False, **kwargs):
@@ -154,8 +152,8 @@ def resnet18(pretrained=False, **kwargs):
     Returns:
         network model with pre-trained weights
     """
-    return _init_module(block=BasicBlock, layers=[2, 2, 2, 2], model_key=resnet18.__name__,
-                        pretrained=pretrained, **kwargs)
+    return _init_module(block=BasicBlock, layers=[2, 2, 2, 2], model_key=resnet18.__name__, pretrained=pretrained,
+                        **kwargs)
 
 
 def resnet34(pretrained=False, **kwargs):
@@ -168,8 +166,8 @@ def resnet34(pretrained=False, **kwargs):
     Returns:
         network model with pre-trained weights
     """
-    return _init_module(block=BasicBlock, layers=[3, 4, 6, 3], model_key=resnet34.__name__,
-                        pretrained=pretrained, **kwargs)
+    return _init_module(block=BasicBlock, layers=[3, 4, 6, 3], model_key=resnet34.__name__, pretrained=pretrained,
+                        **kwargs)
 
 
 def resnet50(pretrained=False, **kwargs):
@@ -182,8 +180,8 @@ def resnet50(pretrained=False, **kwargs):
     Returns:
         network model with pre-trained weights
     """
-    return _init_module(block=Bottleneck, layers=[3, 4, 6, 3], model_key=resnet50.__name__,
-                        pretrained=pretrained, **kwargs)
+    return _init_module(block=Bottleneck, layers=[3, 4, 6, 3], model_key=resnet50.__name__, pretrained=pretrained,
+                        **kwargs)
 
 
 def resnet101(pretrained=False, **kwargs):
@@ -196,8 +194,8 @@ def resnet101(pretrained=False, **kwargs):
     Returns:
         network model with pre-trained weights
     """
-    return _init_module(block=Bottleneck, layers=[3, 4, 23, 3], model_key=resnet101.__name__,
-                        pretrained=pretrained, **kwargs)
+    return _init_module(block=Bottleneck, layers=[3, 4, 23, 3], model_key=resnet101.__name__, pretrained=pretrained,
+                        **kwargs)
 
 
 def resnet152(pretrained=False, **kwargs):
@@ -210,8 +208,8 @@ def resnet152(pretrained=False, **kwargs):
     Returns:
         network model with pre-trained weights
     """
-    return _init_module(block=Bottleneck, layers=[3, 8, 36, 3], model_key=resnet152.__name__,
-                        pretrained=pretrained, **kwargs)
+    return _init_module(block=Bottleneck, layers=[3, 8, 36, 3], model_key=resnet152.__name__, pretrained=pretrained,
+                        **kwargs)
 
 
 def _name_2_func(arch_name: str) -> callable:
