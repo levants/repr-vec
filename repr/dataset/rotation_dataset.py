@@ -12,6 +12,8 @@ from __future__ import print_function
 import cv2
 from fastai.vision import *
 
+from utils.logging import logger
+
 # Extensions
 _IMG_EXTS_1 = ['.jpg', '.jpeg', '.png']
 _IMG_EXTS = set(_IMG_EXTS_1 + [ext.upper() for ext in _IMG_EXTS_1])
@@ -109,7 +111,7 @@ def _valid_image(img):
 
 
 def generate_classes(src_dir: Path, dst_dir: Path, h: int = 224, w: int = 224, tr_mx: dict = None,
-                     interpolation: int = cv2.INTER_LINEAR):
+                     interpolation: int = cv2.INTER_LINEAR, verbose: bool = False):
     """
     Generate rotation data-set for classification
     Args:
@@ -119,6 +121,7 @@ def generate_classes(src_dir: Path, dst_dir: Path, h: int = 224, w: int = 224, t
         w: width of image
         tr_mx: rotation matrices
         interpolation: interpolation for resize
+        verbose: logging flag
     """
     dest_dirs = make_dirs(dst_dir)
     img_dict = {str(p.name): _read_resize(p, h, w, interpolation) for p in src_dir.iterdir() if _valid_image(p)}
@@ -128,12 +131,15 @@ def generate_classes(src_dir: Path, dst_dir: Path, h: int = 224, w: int = 224, t
             try:
                 mod = v if d == '0' else cv2.warpAffine(v, m, (h, w))
                 dst = dest_dirs[d]
+                dst_file = str(dst / k)
                 cv2.imwrite(str(dst / k), mod)
+                logger.print_texts(verbose, f'writes {dst_file}')
             except Exception as ex:
                 print(f'Error on rotating image {k} ', ex)
 
 
-def _add_tests(src_root: Path, dst_root: Path, src_dirs: list, dst_dirs: list, tst_dir: str = None):
+def _add_tests(src_root: Path, dst_root: Path, src_dirs: list, dst_dirs: list, tst_dir: str = None,
+               verbose: bool = True):
     """
     Add test directory to source and destination paths
     Args:
@@ -142,15 +148,16 @@ def _add_tests(src_root: Path, dst_root: Path, src_dirs: list, dst_dirs: list, t
         src_dirs: source directories
         dst_dirs: destination directories
         tst_dir: test directory name
-
+        verbose: logging flag
     """
     if tst_dir:
         src_dirs += [src_root / tst_dir]
         dst_dirs += [dst_root / tst_dir]
+        logger.print_texts(verbose, f'test directories src_dirs = {src_dirs}, dst_dirs = {dst_dirs}')
 
 
 def generate_data(src_root: Path, dst_root: Path, h: int = 224, w: int = 224, tr_dir: str = 'train',
-                  val_dir: str = 'valid', tst_dir: str = None):
+                  val_dir: str = 'valid', tst_dir: str = None, verbose: bool = True):
     """
     Generate rotation data-set
     Args:
@@ -161,21 +168,22 @@ def generate_data(src_root: Path, dst_root: Path, h: int = 224, w: int = 224, tr
         tr_dir: training directory
         val_dir: validation directory
         tst_dir: test directory
-
+        verbose: logging flag
     """
     src_dirs = [src_root / tr_dir, src_root / val_dir]
     dst_dirs = [dst_root / tr_dir, dst_root / val_dir]
-    _add_tests(src_root, dst_root, src_dirs, dst_dirs, tst_dir=tst_dir)
+    logger.print_texts(verbose, f'train and validation directories src_dirs = {src_dirs}, dst_dirs = {dst_dirs}')
+    _add_tests(src_root, dst_root, src_dirs, dst_dirs, tst_dir=tst_dir, verbose=verbose)
     tr_mx = _init_rotation_matrix(h=h, w=w)
     for idx, src_dir in enumerate(src_dirs):
         if src_dir.exists():
             dst_dir = dst_dirs[idx]
             dst_dir.mkdir(exist_ok=True)
-            generate_classes(src_dir, dst_dir, h=h, w=w, tr_mx=tr_mx)
+            generate_classes(src_dir, dst_dir, h=h, w=w, tr_mx=tr_mx, verbose=verbose)
 
 
 def label_and_folder(src_root: Path, dst_root: Path, h: int = 224, w: int = 224, train: PathOrStr = 'train',
-                     valid: PathOrStr = 'valid', valid_pct: float = None):
+                     valid: PathOrStr = 'valid', valid_pct: float = None, verbose: bool = False):
     """
     Label and put data in folders
     Args:
@@ -186,12 +194,12 @@ def label_and_folder(src_root: Path, dst_root: Path, h: int = 224, w: int = 224,
         train: training directory
         valid: validation directory
         valid_pct: validation percentage
-
+        verbose: logging flag
     """
     if valid_pct is None:
-        generate_data(src_root, dst_root, h=h, w=w, tr_dir=train, val_dir=valid)
+        generate_data(src_root, dst_root, h=h, w=w, tr_dir=train, val_dir=valid, verbose=verbose)
     else:
-        generate_classes(src_root, dst_root, h=h, w=w, tr_mx=None)
+        generate_classes(src_root, dst_root, h=h, w=w, tr_mx=None, verbose=verbose)
 
 
 def init_databunch(dst_root: Path, train: PathOrStr = 'train', valid: PathOrStr = 'valid', valid_pct: float = None,
