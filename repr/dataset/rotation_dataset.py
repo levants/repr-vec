@@ -195,7 +195,7 @@ def label_and_folder(src_root: Path, dst_root: Path, h: int = 224, w: int = 224,
         generate_classes(src_root, dst_root, h=h, w=w, tr_mx=None)
 
 
-def init_databunch(dst_root: Path, train: PathOrStr = 'train', valid: PathOrStr = 'valid', valid_pct=None,
+def init_databunch(dst_root: Path, train: PathOrStr = 'train', valid: PathOrStr = 'valid', valid_pct: float = None,
                    seed: int = None, size: int = None, classes: Collection = None, bs: int = 64, val_bs: int = None,
                    ds_tfms: Optional[TfmList] = None, num_workers=None, **kwargs: Any) -> ImageDataBunch:
     """
