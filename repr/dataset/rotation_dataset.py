@@ -44,7 +44,6 @@ def make_dirs(dst_dir: Path) -> dict:
     Make class directories
     Args:
         dst_dir: root destination directory
-
     """
     dest_dirs = dict()
     for cl in _CLASSES:
