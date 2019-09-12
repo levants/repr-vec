@@ -148,7 +148,7 @@ def generate_classes(src_dir: Path, dst_dir: Path, h: int = 224, w: int = 224, t
     for k, v in img_dict.items():
         for d, m in ms.items():
             try:
-                im = _read_resize(p, h, w, interpolation) if lazy_read else v
+                im = _read_resize(v, h, w, interpolation) if lazy_read else v
                 mod = im if d == '0' else cv2.warpAffine(im, m, (h, w))
                 dst = dest_dirs[d]
                 dst_file = str(dst / k)
