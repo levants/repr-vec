@@ -183,7 +183,8 @@ def generate_data(src_root: Path, dst_root: Path, h: int = 224, w: int = 224, tr
 
 
 def label_and_folder(src_root: Path, dst_root: Path, h: int = 224, w: int = 224, train: PathOrStr = 'train',
-                     valid: PathOrStr = 'valid', valid_pct: float = None, verbose: bool = False):
+                     valid: PathOrStr = 'valid', test: PathOrStr = None, valid_pct: float = None,
+                     verbose: bool = False):
     """
     Label and put data in folders
     Args:
@@ -193,11 +194,12 @@ def label_and_folder(src_root: Path, dst_root: Path, h: int = 224, w: int = 224,
         w: width of image
         train: training directory
         valid: validation directory
+        test: test directory
         valid_pct: validation percentage
         verbose: logging flag
     """
     if valid_pct is None:
-        generate_data(src_root, dst_root, h=h, w=w, tr_dir=train, val_dir=valid, verbose=verbose)
+        generate_data(src_root, dst_root, h=h, w=w, tr_dir=train, val_dir=valid, tst_dir=test, verbose=verbose)
     else:
         generate_classes(src_root, dst_root, h=h, w=w, tr_mx=None, verbose=verbose)
 
