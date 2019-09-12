@@ -15,7 +15,7 @@ from pathlib import Path
 
 def dump(src_files: list, dst_dir: Path, func_valid: callable = lambda x: x, verbose: bool = False):
     """
-    Writes files to destination
+    Writes files in to the destination directory
     Args:
         src_files: source files to dump
         dst_dir: destination directory

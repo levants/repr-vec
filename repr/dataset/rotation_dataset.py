@@ -126,6 +126,7 @@ def generate_classes(src_dir: Path, dst_dir: Path, h: int = 224, w: int = 224, t
     dest_dirs = make_dirs(dst_dir)
     img_dict = {str(p.name): _read_resize(p, h, w, interpolation) for p in src_dir.iterdir() if _valid_image(p)}
     ms = _init_rotation_matrix(h=h, w=w, tr_mx=tr_mx)
+    logger.print_texts(verbose, f'generates classes for dst_dirs = {dst_dir} for rotations {ms}')
     for k, v in img_dict.items():
         for d, m in ms.items():
             try:
