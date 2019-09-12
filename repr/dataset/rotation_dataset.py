@@ -145,7 +145,7 @@ def generate_classes(src_dir: Path, dst_dir: Path, h: int = 224, w: int = 224, t
                 _valid_image(p)}
     ms = _init_rotation_matrix(h=h, w=w, tr_mx=tr_mx)
     logger.print_texts(verbose, f'generates classes for dst_dirs = {dst_dir} for rotations {ms}')
-    for k, p in img_dict.items():
+    for k, v in img_dict.items():
         for d, m in ms.items():
             try:
                 im = _read_resize(p, h, w, interpolation) if lazy_read else v
@@ -177,7 +177,7 @@ def _add_tests(src_root: Path, dst_root: Path, src_dirs: list, dst_dirs: list, t
 
 
 def generate_data(src_root: Path, dst_root: Path, h: int = 224, w: int = 224, tr_dir: str = 'train',
-                  val_dir: str = 'valid', tst_dir: str = None, verbose: bool = True):
+                  val_dir: str = 'valid', tst_dir: str = None, lazy_read: bool = False, verbose: bool = True):
     """
     Generate rotation data-set
     Args:
@@ -188,6 +188,7 @@ def generate_data(src_root: Path, dst_root: Path, h: int = 224, w: int = 224, tr
         tr_dir: training directory
         val_dir: validation directory
         tst_dir: test directory
+        lazy_read: lazy load of classes
         verbose: logging flag
     """
     src_dirs = [src_root / tr_dir, src_root / val_dir]
@@ -199,12 +200,12 @@ def generate_data(src_root: Path, dst_root: Path, h: int = 224, w: int = 224, tr
         if src_dir.exists():
             dst_dir = dst_dirs[idx]
             dst_dir.mkdir(exist_ok=True)
-            generate_classes(src_dir, dst_dir, h=h, w=w, tr_mx=tr_mx, verbose=verbose)
+            generate_classes(src_dir, dst_dir, h=h, w=w, tr_mx=tr_mx, lazy_read=lazy_read, verbose=verbose)
 
 
 def label_and_folder(src_root: Path, dst_root: Path, h: int = 224, w: int = 224, train: PathOrStr = 'train',
                      valid: PathOrStr = 'valid', test: PathOrStr = None, valid_pct: float = None,
-                     verbose: bool = False):
+                     lazy_read: bool = False, verbose: bool = False):
     """
     Label and put data in folders
     Args:
@@ -216,12 +217,14 @@ def label_and_folder(src_root: Path, dst_root: Path, h: int = 224, w: int = 224,
         valid: validation directory
         test: test directory
         valid_pct: validation percentage
+        lazy_read: lazy load of images
         verbose: logging flag
     """
     if valid_pct is None:
-        generate_data(src_root, dst_root, h=h, w=w, tr_dir=train, val_dir=valid, tst_dir=test, verbose=verbose)
+        generate_data(src_root, dst_root, h=h, w=w, tr_dir=train, val_dir=valid, tst_dir=test, lazy_read=lazy_read,
+                      verbose=verbose)
     else:
-        generate_classes(src_root, dst_root, h=h, w=w, tr_mx=None, verbose=verbose)
+        generate_classes(src_root, dst_root, h=h, w=w, tr_mx=None, lazy_read=lazy_read, verbose=verbose)
 
 
 def init_databunch(dst_root: Path, train: PathOrStr = 'train', valid: PathOrStr = 'valid', valid_pct: float = None,
