@@ -12,6 +12,8 @@ from __future__ import print_function
 import shutil
 from pathlib import Path
 
+from utils.logging import logger
+
 
 def dump(src_files: list, dst_dir: Path, func_valid: callable = lambda x: x, verbose: bool = False):
     """
@@ -27,4 +29,4 @@ def dump(src_files: list, dst_dir: Path, func_valid: callable = lambda x: x, ver
         if func_valid(src_file_txt):
             dst_file = dst_dir / src_file.name
             shutil.copy2(src_file_txt, str(dst_file))
-            if verbose: print(f'{idx} data if {len(src_files)} is processed')
+            logger.print_texts(verbose, f'{idx} data if {len(src_files)} is processed')

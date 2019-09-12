@@ -98,6 +98,22 @@ def _read_resize(p: str, h: int, w: int, interpolation: int) -> np.ndarray:
     return img
 
 
+def _image_data(p: str, h: int, w: int, interpolation: int, lazy_read: bool = False):
+    """
+        Read and resize image
+        Args:
+            p: path to image
+            h: height to resize
+            w: width to resize
+            interpolation: interpolation for resize
+            lazy_read: lazy reading of image
+
+        Returns:
+            resized image or path
+        """
+    return p if lazy_read else _read_resize(p, h, w, interpolation)
+
+
 def _valid_image(img):
     """
     Validates image
@@ -111,7 +127,7 @@ def _valid_image(img):
 
 
 def generate_classes(src_dir: Path, dst_dir: Path, h: int = 224, w: int = 224, tr_mx: dict = None,
-                     interpolation: int = cv2.INTER_LINEAR, verbose: bool = False):
+                     interpolation: int = cv2.INTER_LINEAR, lazy_read: bool = False, verbose: bool = False):
     """
     Generate rotation data-set for classification
     Args:
@@ -121,16 +137,19 @@ def generate_classes(src_dir: Path, dst_dir: Path, h: int = 224, w: int = 224, t
         w: width of image
         tr_mx: rotation matrices
         interpolation: interpolation for resize
+        lazy_read: lazy reading of image
         verbose: logging flag
     """
     dest_dirs = make_dirs(dst_dir)
-    img_dict = {str(p.name): _read_resize(p, h, w, interpolation) for p in src_dir.iterdir() if _valid_image(p)}
+    img_dict = {str(p.name): _image_data(p, h, w, interpolation, lazy_read=lazy_read) for p in src_dir.iterdir() if
+                _valid_image(p)}
     ms = _init_rotation_matrix(h=h, w=w, tr_mx=tr_mx)
     logger.print_texts(verbose, f'generates classes for dst_dirs = {dst_dir} for rotations {ms}')
-    for k, v in img_dict.items():
+    for k, p in img_dict.items():
         for d, m in ms.items():
             try:
-                mod = v if d == '0' else cv2.warpAffine(v, m, (h, w))
+                im = _read_resize(p, h, w, interpolation) if lazy_read else v
+                mod = im if d == '0' else cv2.warpAffine(im, m, (h, w))
                 dst = dest_dirs[d]
                 dst_file = str(dst / k)
                 cv2.imwrite(str(dst / k), mod)
