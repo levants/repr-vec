@@ -129,7 +129,7 @@ def _init_model(core_type: nn.Module = ResNetCore, block: nn.Module = BasicBlock
 def _init_module(block: nn.Module = BasicBlock, layers: list = None, model_key: str = 'resnet18',
                  pretrained: bool = False, **kwargs) -> nn.Module:
     """
-    Initializes appropriated model
+    Initializes appropriated model by name
     Args:
         block: block for layers initialization
         layers: model layers

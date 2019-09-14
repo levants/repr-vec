@@ -145,7 +145,7 @@ def generate_classes(src_dir: Path, dst_dir: Path, h: int = 224, w: int = 224, t
                 _valid_image(p)}
     ms = _init_rotation_matrix(h=h, w=w, tr_mx=tr_mx)
     logger.print_texts(verbose, f'generates classes for dst_dirs = {dst_dir} for rotations {ms}')
-    for k, v in img_dict.items():
+    for idx, k, v in enumerate(img_dict.items()):
         for d, m in ms.items():
             try:
                 im = _read_resize(v, h, w, interpolation) if lazy_read else v
@@ -156,6 +156,7 @@ def generate_classes(src_dir: Path, dst_dir: Path, h: int = 224, w: int = 224, t
                 logger.print_texts(verbose, f'writes {dst_file}')
             except Exception as ex:
                 print(f'Error on rotating image {k} ', ex)
+        logger.print_texts(verbose, f'{idx} out of {len(img_dict)}')
 
 
 def _add_tests(src_root: Path, dst_root: Path, src_dirs: list, dst_dirs: list, tst_dir: str = None,
