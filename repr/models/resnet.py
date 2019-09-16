@@ -239,6 +239,9 @@ def _name_2_func(arch_name: str) -> callable:
     return arch_func
 
 
+cnn_learner(data, models.resnet50, metrics=[accuracy, error_rate])
+
+
 def init_model(arch: str, pretrained: bool = False, head: nn.Sequential = None, **kwargs) -> nn.Module:
     """
     Initializes ResNet model
@@ -257,5 +260,30 @@ def init_model(arch: str, pretrained: bool = False, head: nn.Sequential = None, 
     else:
         body = create_body(model_func, pretrained=pretrained)
         model = nn.Sequential(body, head)
+
+    return model
+
+
+def create_model(arch: str, nc: int = 1000, pretrained: bool = False,
+                 lin_ftrs: Optional[Collection[int]] = 512, ps: Floats = 0.5, custom_head=None, bn_final: bool = False,
+                 concat_pool: bool = True) -> nn.Module:
+    """
+    Create model for training
+    Args:
+        arch: model architecture name
+        nc: number of classes
+        pretrained: flag to load pre-trained weights
+        lin_ftrs: linear features
+        ps: drop-out percentage
+        custom_head: nustom head for model
+        bn_final: final batch normalization
+        concat_pool: concatination pooling
+
+    Returns:
+        model : network model
+    """
+    base_arch = _name_2_func(arch) if isinstance(arch, str) else _name_2_func(arch.__name__)
+    model = create_cnn_model(base_arch, nc=nc, cut=None, pretrained=pretrained, lin_ftrs=lin_ftrs, ps=ps,
+                             custom_head=custom_head, bn_final=bn_final, concat_pool=concat_pool)
 
     return model
