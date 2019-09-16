@@ -30,9 +30,9 @@ class Flatten(nn.Module):
 class ResNetCore(ResNet):
     """ResNet extension core model"""
 
-    def __init__(self, block, layers, channels=3, num_classes=1000):
+    def __init__(self, block, layers, channels=3, num_classes=1000, concat_pool: bool = False):
         super(ResNetCore, self).__init__(block, layers, num_classes=num_classes)
-        self.avgpool = nn.AdaptiveAvgPool2d(1)
+        self.avgpool = AdaptiveConcatPool2d(1) if concat_pool else nn.AdaptiveAvgPool2d(1)
         self.conv1 = nn.Conv2d(channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
         self.flatten = Flatten()
 
