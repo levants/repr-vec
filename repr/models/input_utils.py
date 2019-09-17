@@ -11,6 +11,7 @@ from __future__ import print_function
 
 import cv2
 import numpy as np
+import torch
 from torchvision import transforms
 
 
@@ -71,3 +72,19 @@ def init_transforms(h=224, w=224, interpolation=cv2.INTER_AREA) -> transforms:
                                Resize(h, w, interpolation=interpolation),
                                transforms.ToTensor(),
                                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
+
+
+def prepare(preprocessors: transforms, *imgs: np.ndarray):
+    """
+    Generate batch of tensors from array
+    Args:
+        preprocessors: input tensor preprocessors
+        *imgs: input images
+
+    Returns:
+        tensor_batch: prepared tensors
+    """
+    tensors = [preprocessors(img) for img in imgs]
+    tensor_batch = torch.stack(tensors, dim=0)
+
+    return tensor_batch
