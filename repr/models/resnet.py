@@ -239,9 +239,6 @@ def _name_2_func(arch_name: str) -> callable:
     return arch_func
 
 
-cnn_learner(data, models.resnet50, metrics=[accuracy, error_rate])
-
-
 def init_model(arch: str, pretrained: bool = False, head: nn.Sequential = None, **kwargs) -> nn.Module:
     """
     Initializes ResNet model
