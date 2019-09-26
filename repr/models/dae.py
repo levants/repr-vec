@@ -30,9 +30,7 @@ def get_deconv(nf: int, of: int, ks: int, stride: int = 1, opad: int = 0, use_bn
                                 padding=ks // 2,
                                 output_padding=opad,
                                 bias=False)
-
     bn = nn.BatchNorm2d(of)
-
     act = nn.LeakyReLU(0.2, inplace=True)
 
     return nn.Sequential(deconv, bn, act) if use_bn else nn.Sequential(deconv, act)
@@ -40,13 +38,9 @@ def get_deconv(nf: int, of: int, ks: int, stride: int = 1, opad: int = 0, use_bn
 
 def weights_init(m):
     classname = m.__class__.__name__
-
     if classname.find('Conv') != -1:
-
         nn.init.normal_(m.weight.data, 0.0, 0.02)
-
     elif classname.find('BatchNorm') != -1:
-
         nn.init.normal_(m.weight.data, 1.0, 0.02)
         nn.init.constant_(m.bias.data, 0)
 

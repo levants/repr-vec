@@ -59,8 +59,7 @@ def _print_texts(*texts):
     Args:
         *texts: array of strings to print
     """
-    out_text = ''.join(str(text) for text in texts)
-    print(out_text)
+    print(''.join(str(text) for text in texts))
 
 
 def print_directly(flags, *texts):
@@ -108,9 +107,7 @@ def log(flags, *_messages):
         *_messages: messages to log
     """
     if _is_verbose(flags) and _messages is not None and len(_messages) > 0:
-        final_message = ''
-        for _message in _messages:
-            final_message += str(_message)
+        final_message = ''.join([str(msg) for msg in _messages])
         print(final_message)
 
 

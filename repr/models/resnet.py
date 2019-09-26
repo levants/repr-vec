@@ -261,9 +261,8 @@ def init_model(arch: str, pretrained: bool = False, head: nn.Sequential = None, 
     return model
 
 
-def create_model(arch: str, nc: int = 1000, pretrained: bool = False,
-                 lin_ftrs: Optional[Collection[int]] = 512, ps: Floats = 0.5, custom_head=None, bn_final: bool = False,
-                 concat_pool: bool = True) -> nn.Module:
+def create_model(arch: str, nc: int = 1000, pretrained: bool = False, lin_ftrs: Optional[Collection[int]] = 512,
+                 ps: Floats = 0.5, custom_head=None, bn_final: bool = False, concat_pool: bool = True) -> nn.Module:
     """
     Create model for training
     Args:

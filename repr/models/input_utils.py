@@ -28,6 +28,7 @@ class Resize(object):
         """Resize input
             Args:
                 img: input image
+
             Returns:
                 re-sized image
         """
@@ -82,9 +83,6 @@ def prepare(preprocessors: transforms, *imgs: np.ndarray):
         *imgs: input images
 
     Returns:
-        tensor_batch: prepared tensors
+        prepared tensors
     """
-    tensors = [preprocessors(img) for img in imgs]
-    tensor_batch = torch.stack(tensors, dim=0)
-
-    return tensor_batch
+    return torch.stack([preprocessors(img) for img in imgs], dim=0)
