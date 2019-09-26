@@ -15,8 +15,7 @@ from fastai.vision import *
 from utils.logging import logger
 
 # Extensions
-_IMG_EXTS_1 = ['.jpg', '.jpeg', '.png']
-_IMG_EXTS = set(_IMG_EXTS_1 + [ext.upper() for ext in _IMG_EXTS_1])
+_IMG_EXTS = set([f(k) for k, v in mimetypes.types_map.items() for f in [lambda x: x, lambda x: x.upper()]])
 
 # Rotation angles
 _CLASSES = [0, 90, 180, 270]
