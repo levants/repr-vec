@@ -16,6 +16,18 @@ from repr.models.input_utils import prepare
 
 
 def grad_cam(model, im, cl, preprocessors, heatmap_thresh: int = 16):
+    """
+    Hitmap the model
+    Args:
+        model: network model
+        im: input image
+        cl: class index
+        preprocessors: preprocessors for image
+        heatmap_thresh: hit-map threshold
+
+    Returns:
+        mult: hit-maped image
+    """
     seq = nn.Sequential(*list(model.children()))
     m = seq.eval()
     cl = int(cl)

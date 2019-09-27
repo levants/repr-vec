@@ -214,6 +214,26 @@ def resnet152(pretrained: bool = False, **kwargs) -> nn.Module:
                         **kwargs)
 
 
+def load_weights(model: nn.Module, weights: str, map_location: str = 'cpu', strict: bool = True):
+    """
+    Load weights for model
+    Args:
+        model: model instance
+        weights: weights file path
+        map_location: location to bind weights
+        strict: strict weights
+    """
+    if weights and weights.strip():
+        state_dict = torch.load(weights, map_location=map_location)
+        if set(state_dict.keys()) == {'model', 'opt'}:
+            model_state = state_dict['model']
+            get_model(model).load_state_dict(model_state, strict=strict)
+        else:
+            get_model(model).load_state_dict(state_dict, strict=strict)
+        del state_dict
+        gc.collect()
+
+
 def _name_2_func(arch_name: str) -> callable:
     """
     Extracts callable by name
@@ -262,7 +282,7 @@ def init_model(arch: str, pretrained: bool = False, head: nn.Sequential = None, 
 
 
 def create_model(arch: str, nc: int = 1000, pretrained: bool = False, lin_ftrs: Optional[Collection[int]] = 512,
-                 ps: Floats = 0.5, custom_head=None, bn_final: bool = False, concat_pool: bool = True) -> nn.Module:
+                 ps: Floats = 0.5, custom_head=None, bn_final: bool = False, concat_pool: bool = False) -> nn.Module:
     """
     Create model for training
     Args:
@@ -281,5 +301,29 @@ def create_model(arch: str, nc: int = 1000, pretrained: bool = False, lin_ftrs: 
     base_arch = _name_2_func(arch) if isinstance(arch, str) else _name_2_func(arch.__name__)
     model = create_cnn_model(base_arch, nc=nc, cut=None, pretrained=pretrained, lin_ftrs=lin_ftrs, ps=ps,
                              custom_head=custom_head, bn_final=bn_final, concat_pool=concat_pool)
+
+    return model
+
+
+def resnet_vec(arch: str, custom_head: list = None, weights: str = None, map_location: str = 'cpu',
+               strict: bool = True) -> nn.Module:
+    """
+    Create model for representation
+    Args:
+        arch: model architecture name
+        custom_head: custom head for model
+        weights: weights file path
+        map_location: device to bind weights and model
+        strict: flag to use strict policy for weights loading
+
+    Returns:
+        model : network model
+    """
+    base_arch = _name_2_func(arch) if isinstance(arch, str) else _name_2_func(arch.__name__)
+    pretrained: bool = not (weights and weights.strip())
+    body = create_body(base_arch, pretrained=pretrained, cut=-2)
+    head = custom_head
+    model = nn.Sequential(body, head)
+    load_weights(model, weights, map_location=map_location, strict=strict)
 
     return model

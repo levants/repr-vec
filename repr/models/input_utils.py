@@ -60,7 +60,7 @@ class Scale(object):
 
 def init_transforms(h=224, w=224, interpolation=cv2.INTER_AREA) -> transforms:
     """
-    Initializes transformations for network model inputs
+    Initializes transformations for network inputs
     Args:
         h: input height
         w: input width
