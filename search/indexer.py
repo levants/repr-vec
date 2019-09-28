@@ -15,6 +15,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+from scipy.spatial.distance import cosine
 
 from repr.models.vecs import Vectorizer
 from utils.logging import logger
@@ -33,10 +34,10 @@ def _dump_data(dst: str, reprs: list, verbose: bool = True):
     """
     with open(dst, 'wb') as vecs:
         pkl.dump(reprs, vecs)
-        logger.print_texts(verbose, f'Saved len(full_dicts) = {len(full_dicts)}')
+        logger.print_texts(verbose, f'Saved len(full_dicts) = {len(reprs)}')
 
 
-def _lead_data(vectors_file: str, verbose: bool = True):
+def _load_data(vectors_file: str, verbose: bool = True):
     """
     Read serialized vectors
     Args:
@@ -53,6 +54,23 @@ def _lead_data(vectors_file: str, verbose: bool = True):
     return images_dict
 
 
+def _vectorize(model: Vectorizer, path: str) -> tuple:
+    """
+    Extract vector from image
+    Args:
+        model: representation extractor model
+        path: image path
+
+    Returns:
+        vec: vector from image
+        img: original image
+    """
+    img = cv2.imread(str(path), cv2.IMREAD_ANYCOLOR)
+    vec = model(img)
+
+    return vec, img
+
+
 def _extract(model: Vectorizer, paths: list) -> np.ndarray:
     """
     Extract vector from image
@@ -62,11 +80,11 @@ def _extract(model: Vectorizer, paths: list) -> np.ndarray:
 
     Returns:
         vec: extracted vector
+        path: image path
     """
     for path in paths:
-        img = cv2.imread(str(path), cv2.IMREAD_ANYCOLOR)
-        vec = model(img)
-        yield vec
+        vec, _ = _vectorize(model, path)
+        yield vec, path
 
 
 def index_dir(model: Vectorizer, src: Path, dst: Path):
@@ -80,3 +98,62 @@ def index_dir(model: Vectorizer, src: Path, dst: Path):
     paths = [pt for pt in src.iterdir() if pt.suffix in IMG_EXTS]
     vecs = list(_extract(model, paths))
     _dump_data(str(dst), vecs)
+
+
+def _extract_img(vec, dbs_vecs) -> list:
+    """
+    Seach image in vectors
+    Args:
+        vec: source vector
+        dbs_vecs: database vectors
+        n_results: number of results
+
+    Returns:
+        dists: top results
+    """
+    dists = list()
+    for vec2, path in dbs_vecs:
+        dist = cosine(vec, vec2)
+        dists.append((dist, path))
+        dists = sorted(dists, key=lambda tup: tup[0])
+
+    return dists
+
+
+def search_img(vec, dbs_vecs, n_results: int = None) -> list:
+    """
+    Seach image in vectors
+    Args:
+        vec: source vector
+        dbs_vecs: database vectors
+        n_results: number of results
+
+    Returns:
+        dists: top results
+    """
+    dists = _extract_img(vec, dbs_vecs)
+    dists = dists[:n_results] if n_results else dists
+
+    return dists
+
+
+def search_index(model: Vectorizer, paths: list, index: Path, n_results: int = None) -> list:
+    """
+    Search files and extract
+    Args:
+        model: model for representation
+        paths: path of images to seach
+        index: index file
+        n_results: number of results
+
+    Returns:
+        res_vecs: result images
+    """
+    res_vecs = list()
+    src_vecs = [_vectorize(model, path) for path in paths]
+    dbs_vecs = _load_data(str(index))
+    for vec1, img in src_vecs:
+        dists = search_img(vec1, dbs_vecs, n_results=n_results)
+        res_vecs.append((img, dists))
+
+    return res_vecs
