@@ -305,13 +305,14 @@ def create_model(arch: str, nc: int = 1000, pretrained: bool = False, lin_ftrs: 
     return model
 
 
-def resnet_vec(arch: str, custom_head: list = None, weights: str = None, map_location: str = 'cpu',
+def resnet_vec(arch: str, head: nn.Sequential = None, cut: int = 3, weights: str = None, map_location: str = 'cpu',
                strict: bool = True) -> nn.Module:
     """
     Create model for representation
     Args:
         arch: model architecture name
-        custom_head: custom head for model
+        head: custom head for model
+        cut: cut for model body
         weights: weights file path
         map_location: device to bind weights and model
         strict: flag to use strict policy for weights loading
@@ -321,8 +322,7 @@ def resnet_vec(arch: str, custom_head: list = None, weights: str = None, map_loc
     """
     base_arch = _name_2_func(arch) if isinstance(arch, str) else _name_2_func(arch.__name__)
     pretrained: bool = not (weights and weights.strip())
-    body = create_body(base_arch, pretrained=pretrained, cut=-2)
-    head = custom_head
+    body = create_body(base_arch, pretrained=pretrained, cut=-cut)
     model = nn.Sequential(body, head)
     load_weights(model, weights, map_location=map_location, strict=strict)
 
