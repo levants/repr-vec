@@ -54,7 +54,7 @@ def _load_data(vectors_file: str, verbose: bool = True):
     return images_dict
 
 
-def _vectorize(model: Encoder, path: str) -> tuple:
+def _encode(model: Encoder, path: str) -> tuple:
     """
     Extract vector from image
     Args:
@@ -71,7 +71,7 @@ def _vectorize(model: Encoder, path: str) -> tuple:
     return vec, img
 
 
-def _extract(model: Encoder, paths: list) -> np.ndarray:
+def _encode_all(model: Encoder, paths: list) -> np.ndarray:
     """
     Extract vector from image
     Args:
@@ -83,7 +83,7 @@ def _extract(model: Encoder, paths: list) -> np.ndarray:
         path: image path
     """
     for path in paths:
-        vec, _ = _vectorize(model, path)
+        vec, _ = _encode(model, path)
         yield vec, path
 
 
@@ -108,7 +108,7 @@ def index_dir(model: Encoder, src: Path, dst: Path):
         dst: destination directory for indexing
     """
     paths = [pt for pt in src.iterdir() if pt.suffix in IMG_EXTS]
-    vecs = list(_extract(model, paths))
+    vecs = list(_encode_all(model, paths))
     _dump_data(str(dst), vecs)
 
 
@@ -162,7 +162,7 @@ def search_dir(model: Encoder, paths: list, index: Path, n_results: int = None) 
         res_vecs: result images
     """
     res_vecs = list()
-    src_vecs = [(_vectorize(model, path), path) for path in paths]
+    src_vecs = [(_encode(model, path), path) for path in paths]
     dbs_vecs = _load_data(str(index))
     for (vec1, img), pt in src_vecs:
         dists = search_img(vec1, dbs_vecs, n_results=n_results)
