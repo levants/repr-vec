@@ -113,7 +113,7 @@ def _encode_all(model: Encoder, paths: list, min_siz: int = 50, verbose: bool = 
             ivld_cnt += 1
             logger.print_texts(verbose, f'there are {ivld_cnt} invalid images')
         else:
-            logger.print_texts(verbose and idx % 1000, f'{idx - ivld_cnt} data is indexed')
+            logger.print_texts(verbose and idx % 1000 == 0, f'{idx - ivld_cnt} data is indexed')
             yield vec, path
 
 
