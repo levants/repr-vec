@@ -54,32 +54,52 @@ def _load_data(vectors_file: str, verbose: bool = True):
     return images_dict
 
 
-def _encode(model: Encoder, path: str) -> tuple:
+def _valid_img(img: np.ndarray, min_siz: int = 50) -> bool:
+    """
+    Validates image on minimum size
+    Args:
+        img: source image
+        min_siz: minimum size requirement
+
+    Returns:
+        vld_img: validation on size
+    """
+    vld_img = img is not None and hasattr(img, 'shape')
+    if vld_img:
+        h, w = img.shape[:2]
+        vld_img = h >= min_siz and w >= min_siz
+
+    return vld_img
+
+
+def _encode(model: Encoder, path: str, min_siz: int = 50) -> tuple:
     """
     Extract vector from image
     Args:
         model: representation extractor model
         path: image path
+        min_siz: minimum image size
 
     Returns:
         vec: vector from image
         img: original image
     """
     img = cv2.imread(str(path), cv2.IMREAD_ANYCOLOR)
-    if img in None or not hasattr(img, 'shape'):
-        vec = None
-    else:
+    if _valid_img(img, min_siz=min_siz):
         vec = model(img)
+    else:
+        vec = None
 
     return vec, img
 
 
-def _encode_all(model: Encoder, paths: list, verbose: bool = False) -> np.ndarray:
+def _encode_all(model: Encoder, paths: list, min_siz: int = 50, verbose: bool = False) -> np.ndarray:
     """
     Extract vector from image
     Args:
         model: representation extractor model
         paths: paths of images
+        min_siz: minimum image size
         verbose: logging flag
 
     Returns:
@@ -87,7 +107,7 @@ def _encode_all(model: Encoder, paths: list, verbose: bool = False) -> np.ndarra
         path: image path
     """
     for idx, path in enumerate(paths):
-        vec, _ = _encode(model, path)
+        vec, _ = _encode(model, path, min_siz=min_siz)
         if vec:
             if verbose and idx % 1000 == 0:
                 print(f'{idx} data is indexed')
@@ -107,17 +127,18 @@ def img_paths(src: Path) -> list:
     return [pt for pt in src.iterdir() if pt.suffix in IMG_EXTS]
 
 
-def index_dir(model: Encoder, src: Path, dst: Path, verbose: bool = False):
+def index_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, verbose: bool = False):
     """
     Index image representations
     Args:
         model: model for representation
         src: source directory of images
         dst: destination directory for indexing
+        min_siz: minimum image size
         verbose: logging flag
     """
     paths = [pt for pt in src.iterdir() if pt.suffix in IMG_EXTS]
-    vecs = list(_encode_all(model, paths, verbose=verbose))
+    vecs = list(_encode_all(model, paths, min_siz=min_siz, verbose=verbose))
     _dump_data(str(dst), vecs)
 
 
