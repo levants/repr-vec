@@ -83,8 +83,7 @@ def _read_images(*paths: Path, min_siz: int = 50) -> tuple:
         imgs: images from paths
         valid_paths: valid paths
     """
-    imgs = []
-    valid_paths = []
+    imgs, valid_paths = list(), list()
     for path in paths:
         img = cv2.imread(str(path), cv2.IMREAD_ANYCOLOR)
         if _valid_img(img, min_siz=min_siz):
@@ -255,7 +254,7 @@ def search_dir(model: Encoder, paths: list, index: Path, n_results: int = None) 
     """
     res_vecs = list()
     src_vec_bts = [(_encode(model, path), path) for path in paths]
-    src_vecs = listify_results(src_vec_bts)
+    src_vecs = [(vec, path) for vec_bt, img_bt, path_bt in src_vec_bts for vec, path in zip(vec_bt, img_bt, path_bt)]
     dbs_vecs = _load_data(str(index))
     for (vec1, img), pt in src_vecs:
         dists = search_img(vec1, dbs_vecs, n_results=n_results)
