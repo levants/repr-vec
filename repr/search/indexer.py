@@ -142,7 +142,8 @@ def _encode_all(model: Encoder, paths: list, min_siz: int = 50, verbose: bool = 
         ivld_cnt += max(img_diff, 0)
         _log_diff(img_diff, ivld_cnt, verbose)
         if valid_paths:
-            logger.print_texts(verbose and idx % step == 0, f'{idx - ivld_cnt} data is indexed')
+            logger.print_texts(verbose and idx % step == 0,
+                               f'{idx} data is processed, valid - {idx * len(path) - ivld_cnt}')
             yield vecs, valid_paths
 
 
