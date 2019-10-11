@@ -109,13 +109,11 @@ def _encode_all(model: Encoder, paths: list, min_siz: int = 50, verbose: bool = 
     ivld_cnt = 0
     for idx, path in enumerate(paths):
         vec, _ = _encode(model, path, min_siz=min_siz)
-        if vec:
-            if verbose and idx % 1000 == 0:
-                print(f'{idx - ivld_cnt} data is indexed')
-        else:
+        if vec is None:
             ivld_cnt += 1
             logger.print_texts(verbose, f'there are {ivld_cnt} invalid images')
-
+        else:
+            logger.print_texts(verbose and idx % 1000, f'{idx - ivld_cnt} data is indexed')
             yield vec, path
 
 
