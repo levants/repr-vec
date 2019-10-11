@@ -129,7 +129,7 @@ def img_paths(src: Path) -> list:
     return [pt for pt in src.iterdir() if pt.suffix in IMG_EXTS]
 
 
-def index_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, verbose: bool = False):
+def index_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, bs: int = None, verbose: bool = False):
     """
     Index image representations
     Args:
@@ -137,9 +137,11 @@ def index_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, verbose: 
         src: source directory of images
         dst: destination directory for indexing
         min_siz: minimum image size
+        bs: batch size
         verbose: logging flag
     """
-    paths = [pt for pt in src.iterdir() if pt.suffix in IMG_EXTS]
+    paths_list = [pt for pt in src.iterdir() if pt.suffix in IMG_EXTS]
+    paths = [paths_list[i:i + bs] for i in range(0, len(paths_list), bs)] if bs and bs > 1 else paths_list
     logger.print_texts(verbose, f'there are {len(paths)} images to index')
     vecs = list(_encode_all(model, paths, min_siz=min_siz, verbose=verbose))
     _dump_data(str(dst), vecs, verbose=verbose)
