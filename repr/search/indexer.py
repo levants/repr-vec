@@ -66,7 +66,10 @@ def _encode(model: Encoder, path: str) -> tuple:
         img: original image
     """
     img = cv2.imread(str(path), cv2.IMREAD_ANYCOLOR)
-    vec = model(img)
+    if img in None or not hasattr(img, 'shape'):
+        vec = None
+    else:
+        vec = model(img)
 
     return vec, img
 
@@ -85,10 +88,11 @@ def _encode_all(model: Encoder, paths: list, verbose: bool = False) -> np.ndarra
     """
     for idx, path in enumerate(paths):
         vec, _ = _encode(model, path)
-        if verbose and idx % 1000 == 0:
-            print(f'{idx} data is indexed')
+        if vec:
+            if verbose and idx % 1000 == 0:
+                print(f'{idx} data is indexed')
 
-        yield vec, path
+            yield vec, path
 
 
 def img_paths(src: Path) -> list:

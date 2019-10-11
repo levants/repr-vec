@@ -13,8 +13,6 @@ import cv2
 from fastai.vision import *
 from torchvision import transforms
 
-from path_utils import data_path
-
 
 class Resize(object):
     """Image processor before model"""
@@ -117,13 +115,3 @@ def init_transforms(h: int = 224, w: int = 224, percnt: float = 0.1,
                                    Resize(h, w, interpolation=interpolation),
                                transforms.ToTensor(),
                                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
-
-
-if __name__ == '__main__':
-    """Test cropping"""
-    src = ImageList.from_folder(data_path() / 'label_engine' / 'cropped_base').split_by_folder().label_from_func(
-        lambda x: str(x.stem)).transform(get_transforms(), size=512)
-    db: DataBunch = src.databunch(bs=1)
-    img = db.train_ds[0][0]
-    resize_to()
-    img.show()
