@@ -37,7 +37,7 @@ def _dump_data(dst: str, reprs: list, verbose: bool = True):
         logger.print_texts(verbose, f'Saved len(full_dicts) = {len(reprs)}')
 
 
-def _load_data(vectors_file: str, verbose: bool = True):
+def load_vecs(vectors_file: str, verbose: bool = True):
     """
     Read serialized vectors
     Args:
@@ -235,7 +235,7 @@ def listify_dir(index: Path, verbose: bool = False):
         index: path to serialized batches
         verbose: logging flag
     """
-    bs_vecs = _load_data(str(index))
+    bs_vecs = load_vecs(str(index))
     vecs = listify_results(bs_vecs)
     _dump_data(str(index), vecs, verbose=verbose)
 
@@ -259,7 +259,7 @@ def search_dir(model: Encoder, paths: list, db_vecs: list = False, index: Path =
     src_vec_bts = list(_encode(model, path) for path in paths)
     src_vecs = [(vec, img, path) for vec_bt, img_bt, path_bt in src_vec_bts for vec, img, path in
                 zip(vec_bt, img_bt, path_bt) if vec_bt is not None]
-    dbs_vecs = db_vecs if db_vecs else _load_data(str(index))
+    dbs_vecs = db_vecs if db_vecs else load_vecs(str(index))
     logger.print_texts(verbose, f'{len(dbs_vecs)} is loaded from disk')
     for vec1, img, pt in src_vecs:
         dists = search_img(vec1, dbs_vecs, n_results=n_results)
