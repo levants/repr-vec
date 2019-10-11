@@ -229,6 +229,18 @@ def search_img(vec, dbs_vecs, n_results: int = None) -> list:
     return dists
 
 
+def listify_dir(index: Path, verbose: bool = False):
+    """
+    Flatten serialized batches
+    Args:
+        index: path to serialized batches
+        verbose: logging flag
+    """
+    bs_vecs = _load_data(str(index))
+    vecs = listify_results(bs_vecs)
+    _dump_data(str(dst), vecs, verbose=verbose)
+
+
 def search_dir(model: Encoder, paths: list, index: Path, n_results: int = None) -> list:
     """
     Search files and extract
