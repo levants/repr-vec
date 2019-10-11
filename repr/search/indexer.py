@@ -147,6 +147,18 @@ def _encode_all(model: Encoder, paths: list, min_siz: int = 50, verbose: bool = 
             yield vecs, valid_paths
 
 
+def listify_results(vec_bts: list) -> list:
+    """
+    Flatten list of data
+    Args:
+        vec_bts: representation vectors batches
+
+    Returns:
+        flatten collection of representation vectors and paths
+    """
+    return [(vec, path) for vec_bt, path_bt in vec_bts for vec, path in zip(vec_bt, path_bt)]
+
+
 def img_paths(src: Path) -> list:
     """
     Generate path list of images from directory
@@ -175,7 +187,8 @@ def index_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, bs: int =
     paths_list = [pt for pt in src.iterdir() if pt.suffix in IMG_EXTS]
     paths = [paths_list[i:i + bs] for i in range(0, len(paths_list), bs)] if bs and bs > 1 else paths_list
     logger.print_texts(verbose, f'there are {len(paths)} images to index')
-    vecs = list(_encode_all(model, paths, min_siz=min_siz, verbose=verbose, step=step))
+    vec_bts = list(_encode_all(model, paths, min_siz=min_siz, verbose=verbose, step=step))
+    vecs = listify_results(vec_bts)
     _dump_data(str(dst), vecs, verbose=verbose)
 
 
