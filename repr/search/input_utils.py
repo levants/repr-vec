@@ -103,7 +103,7 @@ def init_transforms(h: int = 224, w: int = 224, percnt: float = 0.1,
     Args:
         h: input height
         w: input width
-        percnt: percent of cropping
+        percnt: percent of cropping borders
         interpolation: interpolation for image resizing
         crop_center: flag to crop images to center
 

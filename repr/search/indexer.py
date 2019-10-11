@@ -121,7 +121,7 @@ def _log_diff(img_diff: int, ivld_cnt: int, verbose: bool):
         logger.print_texts(verbose, f'there are {ivld_cnt} invalid images')
 
 
-def _encode_all(model: Encoder, paths: list, min_siz: int = 50, verbose: bool = False) -> np.ndarray:
+def _encode_all(model: Encoder, paths: list, min_siz: int = 50, verbose: bool = False, step: int = 100) -> np.ndarray:
     """
     Extract vector from image
     Args:
@@ -129,6 +129,7 @@ def _encode_all(model: Encoder, paths: list, min_siz: int = 50, verbose: bool = 
         paths: paths of images
         min_siz: minimum image size
         verbose: logging flag
+        step: step to log after
 
     Returns:
         vec: extracted vector
@@ -141,7 +142,7 @@ def _encode_all(model: Encoder, paths: list, min_siz: int = 50, verbose: bool = 
         ivld_cnt += max(img_diff, 0)
         _log_diff(img_diff, ivld_cnt, verbose)
         if valid_paths:
-            logger.print_texts(verbose and idx % 1000 == 0, f'{idx - ivld_cnt} data is indexed')
+            logger.print_texts(verbose and idx % step == 0, f'{idx - ivld_cnt} data is indexed')
             yield vecs, valid_paths
 
 
@@ -157,7 +158,8 @@ def img_paths(src: Path) -> list:
     return [pt for pt in src.iterdir() if pt.suffix in IMG_EXTS]
 
 
-def index_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, bs: int = None, verbose: bool = False):
+def index_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, bs: int = None, verbose: bool = False,
+              step: int = 100):
     """
     Index image representations
     Args:
@@ -167,11 +169,12 @@ def index_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, bs: int =
         min_siz: minimum image size
         bs: batch size
         verbose: logging flag
+        step: step to log after
     """
     paths_list = [pt for pt in src.iterdir() if pt.suffix in IMG_EXTS]
     paths = [paths_list[i:i + bs] for i in range(0, len(paths_list), bs)] if bs and bs > 1 else paths_list
     logger.print_texts(verbose, f'there are {len(paths)} images to index')
-    vecs = list(_encode_all(model, paths, min_siz=min_siz, verbose=verbose))
+    vecs = list(_encode_all(model, paths, min_siz=min_siz, verbose=verbose, step=step))
     _dump_data(str(dst), vecs, verbose=verbose)
 
 
