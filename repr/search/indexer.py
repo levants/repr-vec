@@ -71,19 +71,23 @@ def _encode(model: Encoder, path: str) -> tuple:
     return vec, img
 
 
-def _encode_all(model: Encoder, paths: list) -> np.ndarray:
+def _encode_all(model: Encoder, paths: list, verbose: bool = False) -> np.ndarray:
     """
     Extract vector from image
     Args:
         model: representation extractor model
         paths: paths of images
+        verbose: logging flag
 
     Returns:
         vec: extracted vector
         path: image path
     """
-    for path in paths:
+    for idx, path in enumerate(paths):
         vec, _ = _encode(model, path)
+        if verbose and idx % 1000 == 0:
+            print(f'{idx} data is indexed')
+
         yield vec, path
 
 
@@ -99,16 +103,17 @@ def img_paths(src: Path) -> list:
     return [pt for pt in src.iterdir() if pt.suffix in IMG_EXTS]
 
 
-def index_dir(model: Encoder, src: Path, dst: Path):
+def index_dir(model: Encoder, src: Path, dst: Path, verbose: bool = False):
     """
     Index image representations
     Args:
         model: model for representation
         src: source directory of images
         dst: destination directory for indexing
+        verbose: logging flag
     """
     paths = [pt for pt in src.iterdir() if pt.suffix in IMG_EXTS]
-    vecs = list(_encode_all(model, paths))
+    vecs = list(_encode_all(model, paths, verbose=verbose))
     _dump_data(str(dst), vecs)
 
 
