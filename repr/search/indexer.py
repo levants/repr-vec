@@ -72,7 +72,29 @@ def _valid_img(img: np.ndarray, min_siz: int = 50) -> bool:
     return vld_img
 
 
-def _encode(model: Encoder, path: str, min_siz: int = 50) -> tuple:
+def _read_images(*paths: Path, min_siz: int = 50) -> tuple:
+    """
+    Validate and read images
+    Args:
+        *paths: paths of images
+        min_siz: minimum image size to validate
+
+    Returns:
+        imgs: images from paths
+        valid_paths: valid paths
+    """
+    imgs = []
+    valid_paths = []
+    for path in paths:
+        img = cv2.imread(str(path), cv2.IMREAD_ANYCOLOR)
+        if _valid_img(img, min_siz=min_siz):
+            imgs.append(img)
+            valid_paths.append(path)
+
+    return imgs, valid_paths
+
+
+def _encode(model: Encoder, *paths: str, min_siz: int = 50) -> tuple:
     """
     Extract vector from image
     Args:
@@ -81,16 +103,22 @@ def _encode(model: Encoder, path: str, min_siz: int = 50) -> tuple:
         min_siz: minimum image size
 
     Returns:
-        vec: vector from image
-        img: original image
+        vecs: vectors from images
+        imgs: original images
+        valid_paths: valid paths
     """
-    img = cv2.imread(str(path), cv2.IMREAD_ANYCOLOR)
-    if _valid_img(img, min_siz=min_siz):
-        vec = model(img)
+    imgs, valid_paths = _read_images(*paths, min_siz=min_siz)
+    if valid_paths:
+        vecs = model(*imgs)
     else:
-        vec = None
+        vecs = None
 
-    return vec, img
+    return vecs, imgs, valid_paths
+
+
+def _log_diff(img_diff: int, ivld_cnt: int, verbose: bool):
+    if img_diff > 0:
+        logger.print_texts(verbose, f'there are {ivld_cnt} invalid images')
 
 
 def _encode_all(model: Encoder, paths: list, min_siz: int = 50, verbose: bool = False) -> np.ndarray:
@@ -108,13 +136,13 @@ def _encode_all(model: Encoder, paths: list, min_siz: int = 50, verbose: bool = 
     """
     ivld_cnt = 0
     for idx, path in enumerate(paths):
-        vec, _ = _encode(model, path, min_siz=min_siz)
-        if vec is None:
-            ivld_cnt += 1
-            logger.print_texts(verbose, f'there are {ivld_cnt} invalid images')
-        else:
+        vecs, _, valid_paths = _encode(model, *path, min_siz=min_siz)
+        img_diff = len(path) - len(valid_paths)
+        ivld_cnt += max(img_diff, 0)
+        _log_diff(img_diff, ivld_cnt, verbose)
+        if valid_paths:
             logger.print_texts(verbose and idx % 1000 == 0, f'{idx - ivld_cnt} data is indexed')
-            yield vec, path
+            yield vecs, valid_paths
 
 
 def img_paths(src: Path) -> list:
