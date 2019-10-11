@@ -238,7 +238,7 @@ def listify_dir(index: Path, verbose: bool = False):
     """
     bs_vecs = _load_data(str(index))
     vecs = listify_results(bs_vecs)
-    _dump_data(str(dst), vecs, verbose=verbose)
+    _dump_data(str(index), vecs, verbose=verbose)
 
 
 def search_dir(model: Encoder, paths: list, index: Path, n_results: int = None) -> list:
