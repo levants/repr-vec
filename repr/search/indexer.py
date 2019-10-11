@@ -254,7 +254,8 @@ def search_dir(model: Encoder, paths: list, index: Path, n_results: int = None) 
     """
     res_vecs = list()
     src_vec_bts = [(_encode(model, path), path) for path in paths]
-    src_vecs = [(vec, path) for vec_bt, img_bt, path_bt in src_vec_bts for vec, path in zip(vec_bt, img_bt, path_bt)]
+    src_vecs = [(vec, img, path) for vec_bt, img_bt, path_bt in src_vec_bts for vec, img, path in
+                zip(vec_bt, img_bt, path_bt)]
     dbs_vecs = _load_data(str(index))
     for (vec1, img), pt in src_vecs:
         dists = search_img(vec1, dbs_vecs, n_results=n_results)
