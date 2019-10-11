@@ -106,11 +106,15 @@ def _encode_all(model: Encoder, paths: list, min_siz: int = 50, verbose: bool = 
         vec: extracted vector
         path: image path
     """
+    ivld_cnt = 0
     for idx, path in enumerate(paths):
         vec, _ = _encode(model, path, min_siz=min_siz)
         if vec:
             if verbose and idx % 1000 == 0:
-                print(f'{idx} data is indexed')
+                print(f'{idx - ivld_cnt} data is indexed')
+        else:
+            ivld_cnt += 1
+            logger.print_texts(verbose, f'there are {ivld_cnt} invalid images')
 
             yield vec, path
 
@@ -138,8 +142,9 @@ def index_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, verbose: 
         verbose: logging flag
     """
     paths = [pt for pt in src.iterdir() if pt.suffix in IMG_EXTS]
+    logger.print_texts(verbose, f'there are {len(paths)} images to index')
     vecs = list(_encode_all(model, paths, min_siz=min_siz, verbose=verbose))
-    _dump_data(str(dst), vecs)
+    _dump_data(str(dst), vecs, verbose=verbose)
 
 
 def _extract_img(vec, dbs_vecs) -> list:
