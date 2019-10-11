@@ -240,14 +240,15 @@ def listify_dir(index: Path, verbose: bool = False):
     _dump_data(str(index), vecs, verbose=verbose)
 
 
-def search_dir(model: Encoder, paths: list, index: Path, n_results: int = None) -> list:
+def search_dir(model: Encoder, paths: list, index: Path, n_results: int = None, verbose: bool = False) -> list:
     """
     Search files and extract
     Args:
         model: model for representation
-        paths: path of images to seach
+        paths: path of images to search
         index: index file
         n_results: number of results
+        verbose: logging flag
 
     Returns:
         res_vecs: result images
@@ -257,8 +258,10 @@ def search_dir(model: Encoder, paths: list, index: Path, n_results: int = None) 
     src_vecs = [(vec, img, path) for vec_bt, img_bt, path_bt in src_vec_bts for vec, img, path in
                 zip(vec_bt, img_bt, path_bt) if vec_bt is not None]
     dbs_vecs = _load_data(str(index))
+    logger.print_texts(verbose, f'{len(dbs_vecs)} is loaded from disk')
     for vec1, img, pt in src_vecs:
         dists = search_img(vec1, dbs_vecs, n_results=n_results)
         res_vecs.append((img, dists, pt))
+        logger.print_texts(verbose, f'dists = {dists} for path - {pt}')
 
     return res_vecs
