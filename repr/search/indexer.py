@@ -265,10 +265,10 @@ def search_dir(model: Encoder, paths: list, db_vecs: list = None, index: Path = 
     logger.print_texts(verbose, f'len(src_vecs) = {len(src_vecs)} query images are vectorized')
     dbs_vecs = db_vecs if db_vecs else load_dbvecs(str(index))
     logger.print_texts(verbose, f'{len(dbs_vecs)} is loaded from disk')
-    for vec1, img, pt in src_vecs:
+    for idx, (vec1, img, pt) in enumerate(src_vecs):
         dists = search_img(vec1, dbs_vecs, n_results=n_results, verbose=verbose)
         res_vecs.append((img, dists, pt))
-        logger.print_texts(verbose, f'dists = {dists} for path - {pt}')
+        logger.print_texts(verbose, f'result for {idx + 1} out of {len(src_vecs)} extracted , path - {pt}')
 
     return res_vecs, db_vecs
 
