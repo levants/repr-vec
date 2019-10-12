@@ -9,15 +9,16 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import mimetypes
 import pickle as pkl
-from pathlib import Path
 
 import cv2
-import numpy as np
+from fastai.vision import *
 from scipy.spatial.distance import cosine
 
 from repr.models.encoders import Encoder
+from repr.models.resnet import resnet_vec
+from repr.search.config_utils import configure
+from repr.search.input_utils import init_transforms
 from utils.logging import logger
 
 # Static data
@@ -120,7 +121,7 @@ def _log_diff(img_diff: int, ivld_cnt: int, verbose: bool):
         logger.print_texts(verbose, f'there are {ivld_cnt} invalid images')
 
 
-def _encode_all(model: Encoder, paths: list, min_siz: int = 50, verbose: bool = False, step: int = 100) -> np.ndarray:
+def _encode_all(model: Encoder, *paths: list, min_siz: int = 50, verbose: bool = False, step: int = 100) -> np.ndarray:
     """
     Extract vector from image
     Args:
@@ -184,9 +185,9 @@ def index_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, bs: int =
         step: step to log after
     """
     paths_list = [pt for pt in src.iterdir() if pt.suffix in IMG_EXTS]
-    paths = [paths_list[i:i + bs] for i in range(0, len(paths_list), bs)] if bs and bs > 1 else paths_list
+    paths = [paths_list[i:i + bs] for i in range(0, len(paths_list), bs)]
     logger.print_texts(verbose, f'there are {len(paths)} images to index')
-    vec_bts = list(_encode_all(model, paths, min_siz=min_siz, verbose=verbose, step=step))
+    vec_bts = list(_encode_all(model, *paths, min_siz=min_siz, verbose=verbose, step=step))
     vecs = listify_results(vec_bts)
     _dump_data(str(dst), vecs, verbose=verbose)
 
@@ -267,3 +268,40 @@ def search_dir(model: Encoder, paths: list, db_vecs: list = None, index: Path = 
         logger.print_texts(verbose, f'dists = {dists} for path - {pt}')
 
     return res_vecs, db_vecs
+
+
+def encoder_model(weights: str = None) -> Encoder:
+    """
+    Initialize encoder model
+    Args:
+        weights: trained weights file path
+
+    Returns:
+        encoder: encoder model
+    """
+    head = nn.Sequential(nn.AdaptiveAvgPool2d(1), Flatten(), nn.Linear(2048, 4))
+    model = resnet_vec('resnet50', head=head, weights=weights)
+    backbone = nn.Sequential(model[0], model[1][:-1])
+    transforms = init_transforms(h=512, w=512, percnt=0.1, crop_center=True)
+    encoder = Encoder(backbone, transforms, gpu=True)
+    encoder.vec = lambda x: encoder(x)
+
+    return encoder
+
+
+if __name__ == '__main__':
+    """Index and search full directory"""
+    config = configure()
+    path = Path(config.path)
+    weights = Path(config.weights)
+    src = Path(config.src)
+    dst = Path(config.dst)
+    qur = Path(config.qur)
+    gt = Path(config.gt)
+    encoder = encoder_model()
+    if config.search:
+        paths = img_paths(qur)
+        result_data, db_vecs = search_dir(encoder, paths, index=dst, n_results=10, verbose=True)
+        print(f'result_data = {result_data} and db_vecs = {db_vecs}')
+    else:
+        index_dir(encoder, src, dst, bs=config.bs, verbose=config.verbose, step=config.step)

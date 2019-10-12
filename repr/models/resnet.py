@@ -14,7 +14,8 @@ from fastai.vision import *
 from torch.utils import model_zoo
 from torchvision.models.resnet import (ResNet, Bottleneck, BasicBlock, model_urls)
 
-__all__ = ['Flatten', 'ResNetCore', 'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'init_model']
+__all__ = ['Flatten', 'ResNetCore', 'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'init_model',
+           'resnet_vec']
 
 
 class Flatten(nn.Module):
