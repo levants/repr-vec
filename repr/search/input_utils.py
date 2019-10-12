@@ -103,7 +103,7 @@ class Scale(object):
         return self.scale(*args, **kwargs)
 
     def __repr__(self):
-        return self.__class__.__name__
+        return self.__class__.__name__ + '()'
 
 
 def init_transforms(h: int = 224, w: int = 224, percnt: float = 0.1,

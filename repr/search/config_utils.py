@@ -12,6 +12,7 @@ from __future__ import print_function
 import argparse
 
 from path_utils import data_path
+from repr.models.resnet import resnet50
 
 
 def configure() -> argparse.Namespace:
@@ -21,6 +22,11 @@ def configure() -> argparse.Namespace:
         config: configuration parameters namespace
     """
     parser = argparse.ArgumentParser('Configuration for indexing and extraction directories')
+    parser.add_argument('--arch',
+                        dest='arch',
+                        type=str,
+                        default=resnet50.__name__,
+                        help='Backbone model architecture for encoder')
     parser.add_argument('--search',
                         dest='search',
                         action='store_true',
@@ -61,7 +67,12 @@ def configure() -> argparse.Namespace:
                         type=int,
                         default=1,
                         help='Batch size for indexer')
-    # Configurte logging
+    parser.add_argument('--n_results',
+                        dest='n_results',
+                        type=int,
+                        default=10,
+                        help='Number of top results')
+    # Configure logging
     parser.add_argument('--step',
                         dest='step',
                         type=int,

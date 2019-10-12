@@ -273,17 +273,18 @@ def search_dir(model: Encoder, paths: list, db_vecs: list = None, index: Path = 
     return res_vecs, db_vecs
 
 
-def encoder_model(weights: str = None) -> Encoder:
+def encoder_model(arch: str = 'resnet50', weights: str = None) -> Encoder:
     """
     Initialize encoder model
     Args:
+        arch: backbone model architecture for encoder
         weights: trained weights file path
 
     Returns:
         encoder: encoder model
     """
     head = nn.Sequential(nn.AdaptiveAvgPool2d(1), Flatten(), nn.Linear(2048, 4))
-    model = resnet_vec('resnet50', head=head, weights=weights)
+    model = resnet_vec(arch, head=head, weights=weights)
     backbone = nn.Sequential(model[0], model[1][:-1])
     transforms = init_transforms(h=512, w=512, percnt=0.1, crop_center=True)
     encoder = Encoder(backbone, transforms, gpu=True)
@@ -301,10 +302,10 @@ if __name__ == '__main__':
     dst = Path(config.dst)
     qur = Path(config.qur)
     gt = Path(config.gt)
-    encoder = encoder_model()
+    encoder = encoder_model(arch=config.arch, weights=None)
     if config.search:
         paths = img_paths(qur)
-        result_data, db_vecs = search_dir(encoder, paths, index=dst, n_results=10, verbose=True)
+        result_data, db_vecs = search_dir(encoder, paths, index=dst, n_results=config.n_results, verbose=config.verbose)
         print(f'result_data = {result_data} and db_vecs = {db_vecs}')
     else:
         index_dir(encoder, src, dst, bs=config.bs, verbose=config.verbose, step=config.step)

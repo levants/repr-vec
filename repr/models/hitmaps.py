@@ -26,7 +26,7 @@ def grad_cam(model, im, cl, preprocessors, heatmap_thresh: int = 16):
         heatmap_thresh: hit-map threshold
 
     Returns:
-        mult: hit-maped image
+        mult: heat-mapped image
     """
     seq = nn.Sequential(*list(model.children()))
     m = seq.eval()
