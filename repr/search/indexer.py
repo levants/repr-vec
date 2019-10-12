@@ -296,16 +296,17 @@ def encoder_model(arch: str = 'resnet50', weights: str = None) -> Encoder:
 if __name__ == '__main__':
     """Index and search full directory"""
     config = configure()
-    path = Path(config.path)
+    root_path = Path(config.path)
     weights = Path(config.weights)
-    src = Path(config.src)
-    dst = Path(config.dst)
-    qur = Path(config.qur)
-    gt = Path(config.gt)
-    encoder = encoder_model(arch=config.arch, weights=None)
+    src_path = Path(config.src)
+    dst_path = Path(config.dst)
+    qur_path = Path(config.qur)
+    gt_path = Path(config.gt)
+    encoder_model = encoder_model(arch=config.arch, weights=None)
     if config.search:
-        paths = img_paths(qur)
-        result_data, db_vecs = search_dir(encoder, paths, index=dst, n_results=config.n_results, verbose=config.verbose)
-        print(f'result_data = {result_data} and db_vecs = {db_vecs}')
+        query_paths = img_paths(qur_path)
+        result_data, result_vecs = search_dir(encoder_model, query_paths, index=dst_path, n_results=config.n_results,
+                                              verbose=config.verbose)
+        print(f'result_data = {result_data} and db_vecs = {result_vecs}')
     else:
-        index_dir(encoder, src, dst, bs=config.bs, verbose=config.verbose, step=config.step)
+        index_dir(encoder_model, src_path, dst_path, bs=config.bs, verbose=config.verbose, step=config.step)
