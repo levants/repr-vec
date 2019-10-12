@@ -35,6 +35,9 @@ class Resize(object):
     def __call__(self, *args, **kwargs):
         return self.resize(*args, **kwargs)
 
+    def __repr__(self):
+        return self.__class__.__name__ + f'(h={self.h}, w={self.w}, interpolation={self.interpolation})'
+
 
 class CenterCrop(object):
     """Image processor before model"""
@@ -75,6 +78,10 @@ class CenterCrop(object):
     def __call__(self, *args, **kwargs):
         return self.crop(*args, **kwargs)
 
+    def __repr__(self):
+        return self.__class__.__name__ + f'(h={self.h}, w={self.w}, percnt={self.percnt}, ' \
+                                         f'interpolation={self.interpolation})'
+
 
 class Scale(object):
 
@@ -94,6 +101,9 @@ class Scale(object):
 
     def __call__(self, *args, **kwargs):
         return self.scale(*args, **kwargs)
+
+    def __repr__(self):
+        return self.__class__.__name__
 
 
 def init_transforms(h: int = 224, w: int = 224, percnt: float = 0.1,
