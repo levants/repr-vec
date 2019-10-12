@@ -143,7 +143,7 @@ def _encode_all(model: Encoder, *paths: list, min_siz: int = 50, verbose: bool =
         _log_diff(img_diff, ivld_cnt, verbose)
         if valid_paths:
             logger.print_texts(verbose and idx % step == 0,
-                               f'{idx} data is processed, valid - {idx * len(path) - ivld_cnt}')
+                               f'{idx} data is processed, out of {len(paths)}, valid - {idx * len(path) - ivld_cnt}')
             yield vecs, valid_paths
 
 
@@ -192,38 +192,40 @@ def index_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, bs: int =
     _dump_data(str(dst), vecs, verbose=verbose)
 
 
-def _extract_img(vec, dbs_vecs) -> list:
+def _extract_img(vec: list, dbs_vecs: list, verbose: bool = False) -> list:
     """
     Seach image in vectors
     Args:
         vec: source vector
         dbs_vecs: database vectors
-        n_results: number of results
+        verbose: logging flag
 
     Returns:
         dists: top results
     """
-    dists = list()
-    for vec2, path in dbs_vecs:
-        dist = cosine(vec, vec2)
-        dists.append((dist, path))
-        dists = sorted(dists, key=lambda tup: tup[0])
+    timer = logger.start_timer(verbose, 'compare_images')
+    dists = [(cosine(vec, vec2), path) for vec2, path in dbs_vecs]
+    timer.timeit()
+    timer = logger.start_timer(verbose, 'sort_result')
+    dists = sorted(dists, key=lambda tup: tup[0])
+    timer.timeit()
 
     return dists
 
 
-def search_img(vec, dbs_vecs, n_results: int = None) -> list:
+def search_img(vec: list, dbs_vecs: list, n_results: int = None, verbose: bool = False) -> list:
     """
     Seach image in vectors
     Args:
         vec: source vector
         dbs_vecs: database vectors
         n_results: number of results
+        verbose: logging flag
 
     Returns:
         dists: top results
     """
-    dists = _extract_img(vec, dbs_vecs)
+    dists = _extract_img(vec, dbs_vecs, verbose=verbose)
     dists = dists[:n_results] if n_results else dists
 
     return dists
@@ -260,10 +262,11 @@ def search_dir(model: Encoder, paths: list, db_vecs: list = None, index: Path = 
     src_vec_bts = list(_encode(model, path) for path in paths)
     src_vecs = [(vec, img, path) for vec_bt, img_bt, path_bt in src_vec_bts for vec, img, path in
                 zip(vec_bt, img_bt, path_bt) if vec_bt is not None]
+    logger.print_texts(verbose, f'len(src_vecs) = {len(src_vecs)} query images are vectorized')
     dbs_vecs = db_vecs if db_vecs else load_dbvecs(str(index))
     logger.print_texts(verbose, f'{len(dbs_vecs)} is loaded from disk')
     for vec1, img, pt in src_vecs:
-        dists = search_img(vec1, dbs_vecs, n_results=n_results)
+        dists = search_img(vec1, dbs_vecs, n_results=n_results, verbose=verbose)
         res_vecs.append((img, dists, pt))
         logger.print_texts(verbose, f'dists = {dists} for path - {pt}')
 
