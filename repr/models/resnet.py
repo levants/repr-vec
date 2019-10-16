@@ -307,7 +307,7 @@ def create_model(arch: str, nc: int = 1000, pretrained: bool = False, lin_ftrs: 
 
 
 def resnet_vec(arch: str, head: nn.Sequential = None, cut: int = 3, weights: str = None, map_location: str = 'cpu',
-               strict: bool = True) -> nn.Module:
+               strict: bool = True) -> tuple:
     """
     Create model for representation
     Args:
@@ -320,6 +320,8 @@ def resnet_vec(arch: str, head: nn.Sequential = None, cut: int = 3, weights: str
 
     Returns:
         model : network model
+        body: body of model
+        head: head of model
     """
     base_arch = _name_2_func(arch) if isinstance(arch, str) else _name_2_func(arch.__name__)
     pretrained: bool = not (weights and weights.strip())
@@ -327,4 +329,4 @@ def resnet_vec(arch: str, head: nn.Sequential = None, cut: int = 3, weights: str
     model = nn.Sequential(body, head)
     load_weights(model, weights, map_location=map_location, strict=strict)
 
-    return model
+    return model, body, head
