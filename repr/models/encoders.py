@@ -21,10 +21,14 @@ class Encoder(object):
                  gpu: bool = False):
         super(Encoder, self).__init__()
         eval_model = model.eval()
+        eval_head = model[1][:-1].eval() if head is None else head.eval()
+        eval_body = model[0].eval() if body is None else body.eval()
         self.body = model[0].eval() if body is None else body.eval()
         self.head = model[1][:-1].eval() if head is None else head.eval()
         self.gpu = gpu and torch.cuda.is_available()
-        self.model = eval_model.cuda() if self.gpu and torch.cuda.is_available() else eval_model
+        self.model = eval_model.cuda() if self.gpu else eval_model
+        self.body = eval_body.cuda() if self.gpu else eval_body
+        self.head = eval_head.cuda() if self.gpu else eval_head
         self.extr = self.model.vec if hasattr(self.model, 'vec') else self.model
         self.preprocessors = preprocessors
 
