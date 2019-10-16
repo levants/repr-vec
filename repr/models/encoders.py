@@ -21,8 +21,8 @@ class Encoder(object):
                  gpu: bool = False):
         super(Encoder, self).__init__()
         eval_model = model.eval()
-        self.body = nn.Sequential(*list(model.children())[:-2]).eval() if body is None else body.eval()
-        self.head = nn.Sequential(*list(model.children())[-2:]) if head is None else head.eval()
+        self.body = model[0].eval() if body is None else body.eval()
+        self.head = model[1][:-1].eval() if head is None else head.eval()
         self.gpu = gpu and torch.cuda.is_available()
         self.model = eval_model.cuda() if self.gpu and torch.cuda.is_available() else eval_model
         self.extr = self.model.vec if hasattr(self.model, 'vec') else self.model
