@@ -22,15 +22,18 @@ def configure() -> argparse.Namespace:
         config: configuration parameters namespace
     """
     parser = argparse.ArgumentParser('Configuration for indexing and extraction directories')
+    # Model configuration
     parser.add_argument('--arch',
                         dest='arch',
                         type=str,
                         default=resnet50.__name__,
                         help='Backbone model architecture for encoder')
+    # Runtime configuration
     parser.add_argument('--search',
                         dest='search',
                         action='store_true',
                         help='Search or index directory')
+    # Files configuration
     parser.add_argument('--path',
                         dest='path',
                         type=str,
@@ -82,7 +85,6 @@ def configure() -> argparse.Namespace:
                         dest='verbose',
                         action='store_true',
                         help='Logging flag')
-
     config = parser.parse_args()
 
     return config

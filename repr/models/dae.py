@@ -40,6 +40,7 @@ class ResidualBlock(nn.Module):
     def forward(self, x):
         x = x + self.conv_block(x)
         out = self.leak_relu(x)
+
         return out
 
 

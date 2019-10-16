@@ -24,7 +24,7 @@ class CSVLoggeerLine(callbacks.CSVLogger):
         if file_fir:
             self.path = file_fir / f'{filename}.csv'
 
-    def on_epoch_end(self, epoch: int, smooth_loss: Tensor, last_metrics: MetricsList, **kwargs: Any) -> bool:
+    def on_epoch_end(self, epoch: int, smooth_loss: Tensor, last_metrics: MetricsList, **kwargs: Any):
         super(CSVLoggeerLine, self).on_epoch_end(epoch, smooth_loss, last_metrics, **kwargs)
         if self.flush_epoch:
             self.file.flush()

@@ -88,7 +88,8 @@ class Scale(object):
     def __init__(self):
         super(Scale, self).__init__()
 
-    def scale(self, img: np.ndarray) -> np.ndarray:
+    @staticmethod
+    def scale(img: np.ndarray) -> np.ndarray:
         """
         Scales image
         Args:
