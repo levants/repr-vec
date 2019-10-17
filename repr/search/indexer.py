@@ -191,14 +191,14 @@ def _prepare_dir(dst: Path, sidx: int, parts: int = None, stem: str = None):
     return part_dst
 
 
-def call_dir(model: callable, *srcs: Path, dst: Path, min_siz: int = 50, bs: int = None, parts: int = None,
+def call_dir(model: callable, dst: Path, *srcs: Path, min_siz: int = 50, bs: int = None, parts: int = None,
              stem: str = None, data_exts: list = None, verbose: bool = False, step: int = 100):
     """
     Index image representations
     Args:
         model: model for representation
-        *srcs: source directories of images of vectors
         dst: destination directory for indexing
+        *srcs: source directories of images of vectors
         min_siz: minimum image size
         bs: batch size
         parts: partition data
@@ -222,14 +222,14 @@ def call_dir(model: callable, *srcs: Path, dst: Path, min_siz: int = 50, bs: int
         del vecs
 
 
-def index_dir(model: Encoder, *srcs: Path, dst: Path, min_siz: int = 50, bs: int = None, verbose: bool = False,
+def index_dir(model: Encoder, dst: Path, *srcs: Path, min_siz: int = 50, bs: int = None, verbose: bool = False,
               step: int = 100):
     """
     Index image representations
     Args:
         model: model for representation
-        *srcs: source directories of images
         dst: destination directory for indexing
+        *srcs: source directories of images
         min_siz: minimum image size
         bs: batch size
         verbose: logging flag
@@ -238,14 +238,14 @@ def index_dir(model: Encoder, *srcs: Path, dst: Path, min_siz: int = 50, bs: int
     call_dir(model, *srcs, dst, min_siz=min_siz, bs=bs, verbose=verbose, step=step)
 
 
-def slice_dir(model: Encoder, *srcs: Path, dst: Path, min_siz: int = 50, bs: int = None, parts: int = None,
+def slice_dir(model: Encoder, dst: Path, *srcs: Path, min_siz: int = 50, bs: int = None, parts: int = None,
               stem: str = None, verbose: bool = False, step: int = 100):
     """
     Index image representations
     Args:
         model: model for representation
-        *srcs: source directories of images
         dst: destination directory for indexing
+        *srcs: source directories of images
         min_siz: minimum image size
         bs: batch size
         parts: amount of indices
