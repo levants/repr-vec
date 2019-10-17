@@ -195,6 +195,8 @@ def call_dir(model: callable, src: Path, dst: Path, min_siz: int = 50, bs: int =
         vecs = listify_results(vec_bts)
         part_dst = dst if parts is None else dst / str(sidx) / 'vecs.pkl' if stem is None else f'{stem}.pkl'
         _dump_data(str(part_dst), vecs, verbose=verbose)
+        del vec_bts
+        del vecs
 
 
 def index_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, bs: int = None, verbose: bool = False,
