@@ -171,58 +171,80 @@ def img_paths(src: Path) -> list:
     return [pt for pt in src.iterdir() if pt.suffix in IMG_EXTS]
 
 
-def call_dir(model: callable, src: Path, dst: Path, min_siz: int = 50, bs: int = None, parts: int = None,
-             stem: str = None, verbose: bool = False, step: int = 100):
+def _prepare_dir(dst: Path, sidx: int, parts: int = None, stem: str = None):
+    """
+    Create directory to store data
+    Args:
+        dst: parent destination directory
+        sidx: index of partition
+
+    Returns:
+         part_dst: destination to store file
+    """
+    if parts:
+        part_dst_dir = dst / str(sidx)
+        part_dst_dir.mkdir(exist_ok=True)
+        part_dst = part_dst_dir / 'vecs.pkl' if stem is None else part_dst_dir / f'{stem}.pkl'
+    else:
+        part_dst = dst
+
+    return part_dst
+
+
+def call_dir(model: callable, *srcs: Path, dst: Path, min_siz: int = 50, bs: int = None, parts: int = None,
+             stem: str = None, data_exts: list = None, verbose: bool = False, step: int = 100):
     """
     Index image representations
     Args:
         model: model for representation
-        src: source directory of images
+        *srcs: source directories of images of vectors
         dst: destination directory for indexing
         min_siz: minimum image size
         bs: batch size
         parts: partition data
         stem: file name
+        data_exts: image extensions
         verbose: logging flag
         step: step to log after
     """
-    paths_list = [pt for pt in src.iterdir() if pt.suffix in IMG_EXTS]
+    valid_exts = data_exts if data_exts else IMG_EXTS
+    paths_list = [pt for src in srcs for pt in src.iterdir() if pt.suffix in valid_exts]
     paths = [paths_list[i:i + bs] for i in range(0, len(paths_list), bs)]
     logger.print_texts(verbose, f'there are {len(paths)} images to index')
-    chunks = [paths] if parts is None else [paths[i:i + parts] for i in range(0, len(paths), parts)]
-    for sidx, chunk in enumerate(chunks):
+    chunks_bt = [paths] if parts is None else [paths[i:i + parts] for i in range(0, len(paths), parts)]
+    for sidx, chunk in enumerate(chunks_bt):
         vec_bts = list(_encode_all(model, *chunk, min_siz=min_siz, verbose=verbose, step=step))
         vecs = listify_results(vec_bts)
-        part_dst = dst if parts is None else dst / str(sidx) / 'vecs.pkl' if stem is None else f'{stem}.pkl'
+        part_dst = _prepare_dir(dst, sidx, parts=parts, stem=stem)
         _dump_data(str(part_dst), vecs, verbose=verbose)
         logger.print_texts(verbose, f'chunk {sidx + 1} is indexed')
         del vec_bts
         del vecs
 
 
-def index_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, bs: int = None, verbose: bool = False,
+def index_dir(model: Encoder, *srcs: Path, dst: Path, min_siz: int = 50, bs: int = None, verbose: bool = False,
               step: int = 100):
     """
     Index image representations
     Args:
         model: model for representation
-        src: source directory of images
+        *srcs: source directories of images
         dst: destination directory for indexing
         min_siz: minimum image size
         bs: batch size
         verbose: logging flag
         step: step to log after
     """
-    call_dir(model, src, dst, min_siz=min_siz, bs=bs, verbose=verbose, step=step)
+    call_dir(model, *srcs, dst, min_siz=min_siz, bs=bs, verbose=verbose, step=step)
 
 
-def slice_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, bs: int = None, parts: int = None,
+def slice_dir(model: Encoder, *srcs: Path, dst: Path, min_siz: int = 50, bs: int = None, parts: int = None,
               stem: str = None, verbose: bool = False, step: int = 100):
     """
     Index image representations
     Args:
         model: model for representation
-        src: source directory of images
+        *srcs: source directories of images
         dst: destination directory for indexing
         min_siz: minimum image size
         bs: batch size
@@ -231,7 +253,7 @@ def slice_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, bs: int =
         verbose: logging flag
         step: step to log after
     """
-    call_dir(model.slicer, src, dst, min_siz=min_siz, bs=bs, parts=parts, stem=stem, verbose=verbose, step=step)
+    call_dir(model.slicer, *srcs, dst, min_siz=min_siz, bs=bs, parts=parts, stem=stem, verbose=verbose, step=step)
 
 
 def _extract_img(vec: list, dbs_vecs: list, verbose: bool = False) -> list:
