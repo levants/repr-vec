@@ -171,8 +171,8 @@ def img_paths(src: Path) -> list:
     return [pt for pt in src.iterdir() if pt.suffix in IMG_EXTS]
 
 
-def call_dir(model: callable, src: Path, dst: Path, min_siz: int = 50, bs: int = None, verbose: bool = False,
-             step: int = 100):
+def call_dir(model: callable, src: Path, dst: Path, min_siz: int = 50, bs: int = None, parts: int = None,
+             stem: str = None, verbose: bool = False, step: int = 100):
     """
     Index image representations
     Args:
@@ -181,15 +181,20 @@ def call_dir(model: callable, src: Path, dst: Path, min_siz: int = 50, bs: int =
         dst: destination directory for indexing
         min_siz: minimum image size
         bs: batch size
+        parts: partition data
+        stem: file name
         verbose: logging flag
         step: step to log after
     """
     paths_list = [pt for pt in src.iterdir() if pt.suffix in IMG_EXTS]
     paths = [paths_list[i:i + bs] for i in range(0, len(paths_list), bs)]
     logger.print_texts(verbose, f'there are {len(paths)} images to index')
-    vec_bts = list(_encode_all(model, *paths, min_siz=min_siz, verbose=verbose, step=step))
-    vecs = listify_results(vec_bts)
-    _dump_data(str(dst), vecs, verbose=verbose)
+    chunks = [paths] if parts is None else [paths[i:i + parts] for i in range(0, len(paths), parts)]
+    for sidx, chunk in enumerate(chunks):
+        vec_bts = list(_encode_all(model, *chunk, min_siz=min_siz, verbose=verbose, step=step))
+        vecs = listify_results(vec_bts)
+        part_dst = dst if parts is None else dst / str(sidx) / 'vecs.pkl' if stem is None else f'{stem}.pkl'
+        _dump_data(str(part_dst), vecs, verbose=verbose)
 
 
 def index_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, bs: int = None, verbose: bool = False,
@@ -208,8 +213,8 @@ def index_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, bs: int =
     call_dir(model, src, dst, min_siz=min_siz, bs=bs, verbose=verbose, step=step)
 
 
-def slice_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, bs: int = None, verbose: bool = False,
-              step: int = 100):
+def slice_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, bs: int = None, parts: int = None,
+              stem: str = None, verbose: bool = False, step: int = 100):
     """
     Index image representations
     Args:
@@ -218,10 +223,12 @@ def slice_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, bs: int =
         dst: destination directory for indexing
         min_siz: minimum image size
         bs: batch size
+        parts: amount of indices
+        stem: index file name stem
         verbose: logging flag
         step: step to log after
     """
-    call_dir(model.slicer, src, dst, min_siz=min_siz, bs=bs, verbose=verbose, step=step)
+    call_dir(model.slicer, src, dst, min_siz=min_siz, bs=bs, parts=parts, stem=stem, verbose=verbose, step=step)
 
 
 def _extract_img(vec: list, dbs_vecs: list, verbose: bool = False) -> list:
@@ -340,5 +347,7 @@ if __name__ == '__main__':
         result_data, result_vecs = search_dir(encoder_model, query_paths, index=dst_path, n_results=config.n_results,
                                               verbose=config.verbose)
         print(f'result_data = {result_data} and db_vecs = {result_vecs}')
+    elif config.slice:
+        slice_dir(encoder_model, src_path, dst_path, bs=config.bs, verbose=config.verbose, step=config.step)
     else:
         index_dir(encoder_model, src_path, dst_path, bs=config.bs, verbose=config.verbose, step=config.step)

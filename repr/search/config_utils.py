@@ -33,6 +33,10 @@ def configure() -> argparse.Namespace:
                         dest='search',
                         action='store_true',
                         help='Search or index directory')
+    parser.add_argument('--slice',
+                        dest='slice',
+                        action='store_true',
+                        help='Slice or index directory')
     # Files configuration
     parser.add_argument('--path',
                         dest='path',
