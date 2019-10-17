@@ -373,6 +373,6 @@ if __name__ == '__main__':
                                               verbose=config.verbose)
         print(f'result_data = {result_data} and db_vecs = {result_vecs}')
     elif config.slice:
-        slice_dir(encoder_model, src_path, dst_path, bs=config.bs, verbose=config.verbose, step=config.step)
+        slice_dir(encoder_model, dst_path, src_path, bs=config.bs, verbose=config.verbose, step=config.step)
     else:
-        index_dir(encoder_model, src_path, dst_path, bs=config.bs, verbose=config.verbose, step=config.step)
+        index_dir(encoder_model, dst_path, src_path, bs=config.bs, verbose=config.verbose, step=config.step)
