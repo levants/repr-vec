@@ -191,24 +191,22 @@ def _prepare_dir(dst: Path, sidx: int, parts: int = None, stem: str = None):
     return part_dst
 
 
-def call_dir(model: callable, dst: Path, *srcs: Path, min_siz: int = 50, bs: int = None, parts: int = None,
-             stem: str = None, data_exts: list = None, verbose: bool = False, step: int = 100):
+def call_dir(model: callable, src: Path, dst: Path, min_siz: int = 50, bs: int = None, parts: int = None,
+             stem: str = None, verbose: bool = False, step: int = 100):
     """
     Index image representations
     Args:
         model: model for representation
+        src: source directory of images
         dst: destination directory for indexing
-        *srcs: source directories of images of vectors
         min_siz: minimum image size
         bs: batch size
         parts: partition data
         stem: file name
-        data_exts: image extensions
         verbose: logging flag
         step: step to log after
     """
-    valid_exts = data_exts if data_exts else IMG_EXTS
-    paths_list = [pt for src in srcs for pt in src.iterdir() if pt.suffix in valid_exts]
+    paths_list = [pt for pt in src.iterdir() if pt.suffix in IMG_EXTS]
     paths = [paths_list[i:i + bs] for i in range(0, len(paths_list), bs)]
     logger.print_texts(verbose, f'there are {len(paths)} images to index')
     chunks_bt = [paths] if parts is None else [paths[i:i + parts] for i in range(0, len(paths), parts)]
@@ -222,30 +220,30 @@ def call_dir(model: callable, dst: Path, *srcs: Path, min_siz: int = 50, bs: int
         del vecs
 
 
-def index_dir(model: Encoder, dst: Path, *srcs: Path, min_siz: int = 50, bs: int = None, verbose: bool = False,
+def index_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, bs: int = None, verbose: bool = False,
               step: int = 100):
     """
     Index image representations
     Args:
         model: model for representation
+        src: source directory of images
         dst: destination directory for indexing
-        *srcs: source directories of images
         min_siz: minimum image size
         bs: batch size
         verbose: logging flag
         step: step to log after
     """
-    call_dir(model, *srcs, dst, min_siz=min_siz, bs=bs, verbose=verbose, step=step)
+    call_dir(model, src, dst, min_siz=min_siz, bs=bs, verbose=verbose, step=step)
 
 
-def slice_dir(model: Encoder, dst: Path, *srcs: Path, min_siz: int = 50, bs: int = None, parts: int = None,
+def slice_dir(model: Encoder, src: Path, dst: Path, min_siz: int = 50, bs: int = None, parts: int = None,
               stem: str = None, verbose: bool = False, step: int = 100):
     """
     Index image representations
     Args:
         model: model for representation
+        src: source directory of images
         dst: destination directory for indexing
-        *srcs: source directories of images
         min_siz: minimum image size
         bs: batch size
         parts: amount of indices
@@ -253,7 +251,7 @@ def slice_dir(model: Encoder, dst: Path, *srcs: Path, min_siz: int = 50, bs: int
         verbose: logging flag
         step: step to log after
     """
-    call_dir(model.slicer, *srcs, dst, min_siz=min_siz, bs=bs, parts=parts, stem=stem, verbose=verbose, step=step)
+    call_dir(model.slicer, src, dst, min_siz=min_siz, bs=bs, parts=parts, stem=stem, verbose=verbose, step=step)
 
 
 def _extract_img(vec: list, dbs_vecs: list, verbose: bool = False) -> list:
@@ -373,6 +371,6 @@ if __name__ == '__main__':
                                               verbose=config.verbose)
         print(f'result_data = {result_data} and db_vecs = {result_vecs}')
     elif config.slice:
-        slice_dir(encoder_model, dst_path, src_path, bs=config.bs, verbose=config.verbose, step=config.step)
+        slice_dir(encoder_model, src_path, dst_path, bs=config.bs, verbose=config.verbose, step=config.step)
     else:
-        index_dir(encoder_model, dst_path, src_path, bs=config.bs, verbose=config.verbose, step=config.step)
+        index_dir(encoder_model, src_path, dst_path, bs=config.bs, verbose=config.verbose, step=config.step)
