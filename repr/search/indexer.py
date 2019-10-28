@@ -346,10 +346,10 @@ def encoder_model(arch: str = 'resnet50', weights: str = None) -> Encoder:
         encoder: encoder model
     """
     head = nn.Sequential(nn.AdaptiveAvgPool2d(1), Flatten(), nn.Linear(2048, 4))
-    model = resnet_vec(arch, head=head, weights=weights)
+    model, body, head = resnet_vec(arch, head=head, weights=weights)
     backbone = nn.Sequential(model[0], model[1][:-1])
     transforms = init_transforms(h=512, w=512, percnt=0.1, crop_center=True)
-    encoder = Encoder(backbone, transforms, gpu=True)
+    encoder = Encoder(backbone, transforms, head=head[:-1], body=body, gpu=True)
     encoder.vec = lambda x: encoder(x)
 
     return encoder
@@ -371,6 +371,8 @@ if __name__ == '__main__':
                                               verbose=config.verbose)
         print(f'result_data = {result_data} and db_vecs = {result_vecs}')
     elif config.slice:
-        slice_dir(encoder_model, src_path, dst_path, bs=config.bs, verbose=config.verbose, step=config.step)
+        dst_dir = dst_path.parent
+        slice_dir(encoder_model, src_path, dst_dir, bs=config.bs, parts=2, stem='slices', verbose=config.verbose,
+                  step=config.step)
     else:
         index_dir(encoder_model, src_path, dst_path, bs=config.bs, verbose=config.verbose, step=config.step)
